@@ -1,0 +1,620 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}เรียนเสร็จสิ้น: {{ session.subject.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Global Background */
+    body { 
+        font-family: kanit, sans-serif;
+        background-color: #EDF0F9; 
+    }
+    .navbar { 
+        background: var(--card-bg); 
+        padding: 1rem 2rem; 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+        position: sticky; 
+        top: 0; 
+        z-index: 100; 
+    }
+    .logo-icon { 
+        height: 40px; 
+    }
+    .nav-left { 
+        display: flex; 
+        align-items: center; 
+        gap: 10px; 
+        font-weight: 600; 
+        color: var(--primary); 
+        font-size: 1.2rem; 
+    }
+    .profile-container { 
+        position: relative; 
+        cursor: pointer; 
+        display: flex; 
+        align-items: center; 
+    }
+    .profile-popup { 
+        display: none; 
+        position: absolute; 
+        top: 60px; 
+        right: 0; 
+        width: 250px; 
+        background-color: #fff; 
+        border-radius: 8px; 
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+        z-index: 1000; padding: 1rem; 
+    }
+    .profile-popup-header { 
+        text-align: center; 
+        padding-bottom: 1rem; 
+        border-bottom: 1px solid #eee; 
+    }
+    .profile-img { 
+        width: 40px; 
+        height: 40px; 
+        background: #E0E0E0; 
+        border-radius: 50%; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        font-weight: bold; 
+        color: #555; 
+        margin-right: 10px; 
+    }
+      
+    /* Main Container */
+    .study-container {
+        max-width: 1000px;
+        margin: 40px auto;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* จัดทุกอย่างใน Container ให้อยู่กลางแนวตั้ง */
+        min-height: 600px;
+    }
+    .study-header { 
+        text-align: center; 
+        margin-bottom: 40px; 
+    }
+    .study-header h1 { 
+        font-size: 2rem; 
+        color: #2C3E50; 
+        margin: 0; 
+        font-weight: 700; 
+    }
+
+    /* --- Grid Layout (แก้ไขเพื่อให้เส้นแบ่งอยู่ตรงกลาง) --- */
+    .study-grid {
+        display: grid;
+        /* เปลี่ยนจาก 1.2fr เป็น 1fr เพื่อให้ซ้ายขวาเท่ากัน เส้นจะอยู่ตรงกลาง */
+        grid-template-columns: 1fr 1px 1fr; 
+        gap: 40px;
+        width: 100%;
+        align-items: center;
+    }
+
+    /* Divider */
+    .divider { 
+        background-color: #E0E0E0; 
+        width: 1px; 
+        height: 100%; 
+        min-height: 300px; 
+        /* เพิ่ม margin auto เพื่อความชัวร์ */
+        margin: 0 auto; 
+    }
+
+    /* Left Column: Info */
+    .info-column { 
+        display: flex; 
+        flex-direction: column; 
+        gap: 20px; 
+    }
+    .info-row { 
+        display: grid; 
+        grid-template-columns: 1fr 1fr; 
+        gap: 20px; 
+    }
+    .info-group label { 
+        display: block; 
+        font-size: 0.85rem; 
+        color: #666; 
+        margin-bottom: 5px; 
+        font-weight: 500; 
+    }
+    
+    .info-box {
+        border: 1px solid #E0E0E0;
+        border-radius: 12px;
+        padding: 12px 15px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2C3E50;
+        background: #fff;
+        text-align: center;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Right Column: Visual (Success Circle) */
+    .visual-column {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .success-wrapper {
+        position: relative;
+        width: 300px;
+        height: 300px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* SVG Styles for Success Checkmark */
+    .success-ring {
+        fill: none;
+        stroke: #00C805;
+        stroke-width: 15;
+        stroke-linecap: round;
+        width: 100%;
+        height: 100%;
+    }
+    
+    .check-circle-fill {
+        background-color: #00C805;
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 4px 15px rgba(0, 200, 5, 0.3);
+        animation: scaleIn 0.5s ease-out;
+    }
+
+    .check-icon {
+        color: white;
+        font-size: 5rem;
+        font-weight: bold;
+    }
+
+    /* Buttons Section */
+    .action-buttons-row {
+        margin-top: 50px;
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    /* Wrapper สำหรับปุ่มกลับ เพื่อจัดให้อยู่ตรงกลาง */
+    .back-btn-wrapper {
+        width: 100%; 
+        max-width: 400px; 
+        margin: 15px auto 0 auto; /* auto ซ้ายขวา เพื่อจัดกลาง */
+        display: flex;
+        justify-content: center;
+    }
+
+    .btn-action {
+        padding: 15px 30px;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: transform 0.2s, box-shadow 0.2s;
+        text-align: center;
+        text-decoration: none;
+        min-width: 180px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .btn-action:hover { 
+        transform: translateY(-2px); 
+    }
+    /* Button Colors */
+    .btn-summary {
+        background-color: #AB70FF;
+        color: white;
+        box-shadow: 0 4px 12px rgba(153, 81, 255, 0.3);
+    }
+    .btn-summary:hover { 
+        background-color: #8339f0; 
+    }
+    .btn-quiz {
+        background-color: #077AFE;
+        color: white;
+        box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+    }
+    .btn-quiz:hover { 
+        background-color: #155cb8; 
+    }
+    .btn-back-home {
+        background-color: white;
+        color: #333;
+        border: 1px solid #ddd;
+        width: 100%; /* ให้เต็ม wrapper */
+    }
+    .btn-back-home:hover { 
+        background-color: #f8f9fa; 
+    }
+    @keyframes scaleIn {
+        from { transform: scale(0); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .study-grid { 
+            grid-template-columns: 1fr; 
+            gap: 30px; 
+        }
+        .divider { 
+            width: 100%; 
+            height: 1px; 
+            min-height: 1px; 
+            margin: 20px 0;
+        }
+        .action-buttons-row { 
+            flex-direction: column; 
+            align-items: center;
+        }
+        .btn-action { 
+            width: 100%; 
+            max-width: 400px;
+        }
+    }
+
+    .modal-overlay {
+        display: none; /* ซ่อนไว้ก่อน */
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 2000;
+        justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(5px); /* เบลอฉากหลัง */
+    }
+    .modal-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 20px;
+        width: 90%;
+        max-width: 500px;
+        position: relative;
+        animation: popUp 0.3s ease;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    .modal-header { 
+        border-bottom: 1px solid #eee; 
+        padding-bottom: 10px; margin-bottom: 15px; 
+    }
+    .modal-header h3 { 
+        margin: 0; color: #AB70FF; 
+    }
+
+    /* จัด Format HTML ที่ AI ส่งมา */
+    #resultState ul { 
+        padding-left: 20px; 
+    }
+    #resultState li { 
+        margin-bottom: 8px; 
+    }
+    #resultState strong { 
+        color: #336BF9; 
+    }
+
+    @keyframes popUp {
+        from { transform: scale(0.9); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+    /* Quiz Styles */
+    .question-box {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #eee;
+    }
+    .question-text {
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #2C3E50;
+    }
+    .option-label {
+        display: block;
+        padding: 8px 12px;
+        margin: 5px 0;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .option-label:hover { background-color: #f8f9fa; }
+    .option-label input { margin-right: 10px; }
+    
+    /* Correct/Wrong Styles */
+    .option-label.correct { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+    .option-label.wrong { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<nav class="navbar">
+    <div class="nav-left">
+        <img class="logo-icon" src="{% static 'images/logo.png' %}" alt="Logo">
+        <span>Smart Study Planner</span>
+    </div>
+    <div class="profile-container" onclick="togglePopup()">
+        <div class="profile-img">{{ user.username|make_list|first|upper }}</div>
+        <span style="font-weight: bold;">{{ user.username }}</span>
+        <div id="profile-popup" class="profile-popup">
+            <div class="profile-popup-header">
+                <div class="profile-img">
+                    {{ user.username|make_list|first|upper }}
+                </div>
+                <h4>{{ user.first_name }} {{ user.last_name }}</h4>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="study-container">
+    <div class="study-header">
+        <h1>{{ session.subject.name }}</h1>
+        <p style="color: #666; margin-top: 5px;">{{ session.topic|default:"ไม่มีหัวข้อระบุ" }}</p>
+    </div>
+
+    <div class="study-grid">
+        <div class="info-column">
+            
+            <div class="info-row">
+                <div class="info-group">
+                    <label>ระยะเวลาการเรียน</label>
+                    <div class="info-box">{{ duration_minutes }} นาที</div>
+                </div>
+                <div class="info-group">
+                    <label>เวลา</label>
+                    <div class="info-box">{{ session.start_time|date:"H:i" }} - {{ session.end_time|date:"H:i" }}</div>
+                </div>
+            </div>
+
+            <div class="info-row">
+                <div class="info-group">
+                    <label>ระยะเวลาพักผ่อน</label>
+                    <div class="info-box">
+                        {% if break_minutes > 0 %}{{ break_minutes }} นาที{% else %}ไม่พัก{% endif %}
+                    </div>
+                </div>
+                <div class="info-group">
+                    <label>ความคืบหน้า</label>
+                    <div class="info-box">100%</div>
+                </div>
+            </div>
+
+            <div class="info-group">
+                <label>ระดับ</label>
+                <div class="info-box">
+                    {{ session.subject.get_difficulty_display }}
+                </div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="visual-column">
+            <div class="success-wrapper">
+                <svg viewBox="0 0 300 300" style="position: absolute; width: 100%; height: 100%;">
+                    <circle cx="150" cy="150" r="130" fill="none" stroke="#00C805" stroke-width="15"></circle>
+                </svg>
+                
+                <div class="check-circle-fill">
+                    <i class="fas fa-check check-icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-buttons-row">
+        <button type="button" class="btn-action btn-summary" onclick="startSummaryProcess()">
+            <!-- <i class="fas fa-magic" style="margin-right: 8px;"></i>  -->
+            สรุปเนื้อหาและบันทึก
+        </button>
+        
+        <button type="button" class="btn-action btn-quiz" onclick="startQuiz()">
+            <!-- <i class="fas fa-pencil-alt" style="margin-right: 8px;"></i>  -->
+            แบบทดสอบหลังเรียน
+        </button>
+    </div>
+
+    <div class="back-btn-wrapper">
+        <a href="{% url 'home_page' %}" class="btn-action btn-back-home">
+            กลับหน้าหลัก
+        </a>
+    </div>
+
+    <div id="loadingModal" class="modal-overlay">
+        <div class="modal-content" style="text-align: center; padding: 40px;">
+            <i class="fas fa-robot fa-bounce" style="font-size: 3rem; color: #AB70FF; margin-bottom: 20px;"></i>
+            <h3 style="color: #2C3E50; margin-bottom: 10px;">กำลังให้ AI สรุปเนื้อหา...</h3>
+            <p style="color: #666;">กรุณารอสักครู่ ระบบกำลังวิเคราะห์และบันทึกข้อมูล</p>
+        </div>
+    </div>
+
+    <div id="quizModal" class="modal-overlay">
+        <div class="modal-content">
+            <!-- <button class="modal-close" onclick="closeQuizModal()">&times;</button> -->
+            <div class="modal-header">
+                <h3><i class="fas fa-puzzle-piece"></i> แบบทดสอบ (5 ข้อ)</h3>
+            </div>
+
+            <div class="modal-body">
+                <div id="quizLoading" style="text-align: center; padding: 20px;">
+                    <i class="fas fa-circle-notch fa-spin" style="font-size: 2rem; color: #077AFE;"></i>
+                    <p id="quizLoadingText" style="margin-top: 10px;">กำลังออกข้อสอบ...</p>
+                </div>
+
+                <div id="quizContainer" style="display: none;">
+                    <div id="questionsList"></div>
+
+                    <div style="margin-top: 20px; text-align: center;">
+                        <button class="btn-action btn-quiz" onclick="checkAnswers()" style="width: 100%;">
+                            ส่งคำตอบ
+                        </button>
+                    </div>
+                </div>
+
+                </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const sessionId = "{{ session.session_id }}";
+    const modal = document.getElementById('summaryModal');
+    const loadingState = document.getElementById('loadingState');
+    const resultState = document.getElementById('resultState');
+    const summaryContent = document.getElementById('summaryContent');
+
+    function startSummaryProcess() {
+        // 1. เปิด Modal Loading
+        document.getElementById('loadingModal').style.display = 'flex';
+        
+        const sessionId = "{{ session.session_id }}";
+        
+        // 2. เรียก API ให้ AI ทำงาน
+        fetch(`/api/get-summary/${sessionId}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = "{% url 'study_summary' session.session_id %}";
+                } else {
+                    alert("เกิดข้อผิดพลาด: " + data.error);
+                    document.getElementById('loadingModal').style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("เชื่อมต่อล้มเหลว กรุณาลองใหม่");
+                document.getElementById('loadingModal').style.display = 'none';
+            });
+    }
+
+    let currentQuizData = []; 
+
+    function startQuiz() {
+        document.getElementById('quizModal').style.display = 'flex';
+        document.getElementById('quizLoading').style.display = 'block';
+        document.getElementById('quizContainer').style.display = 'none';
+        // document.getElementById('quizResult').style.display = 'none';
+
+        // Fetch Quiz Data
+        fetch(`/api/get-quiz/${sessionId}/`)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('quizLoading').style.display = 'none';
+                if (data.success) {
+                    currentQuizData = data.quiz;
+                    renderQuiz(data.quiz);
+                } else {
+                    alert("ไม่สามารถสร้างโจทย์ได้: " + data.error);
+                    closeQuizModal();
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+                closeQuizModal();
+            });
+    }
+
+    function renderQuiz(questions) {
+        const container = document.getElementById('questionsList');
+        container.innerHTML = '';
+        
+        questions.forEach((q, index) => {
+            let html = `<div class="question-box">
+                <div class="question-text">${index + 1}. ${q.question}</div>`;
+            
+            q.options.forEach((opt, optIndex) => {
+                html += `<label class="option-label" id="q${index}_opt${optIndex}">
+                            <input type="radio" name="q${index}" value="${optIndex}"> ${opt}
+                         </label>`;
+            });
+            
+            html += `</div>`;
+            container.innerHTML += html;
+        });
+        
+        document.getElementById('quizContainer').style.display = 'block';
+    }
+
+    function checkAnswers() {
+        const userAnswers = [];
+        let allAnswered = true;
+
+        // เก็บคำตอบของผู้ใช้
+        currentQuizData.forEach((q, index) => {
+            const selected = document.querySelector(`input[name="q${index}"]:checked`);
+            if (selected) {
+                userAnswers.push(parseInt(selected.value));
+            } else {
+                userAnswers.push(null); // ไม่ได้ตอบ
+                allAnswered = false;
+            }
+        });
+
+        if (!allAnswered) {
+            if(!confirm("คุณยังทำข้อสอบไม่ครบ ต้องการส่งเลยหรือไม่?")) return;
+        }
+
+        document.getElementById('quizContainer').style.display = 'none';
+        document.getElementById('quizLoading').innerHTML = '<i class="fas fa-paper-plane fa-bounce"></i><p>กำลังส่งคำตอบ...</p>';
+        document.getElementById('quizLoading').style.display = 'block';
+
+        // ส่งข้อมูลไป Server (POST)
+        fetch("{% url 'submit_quiz' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                session_id: "{{ session.session_id }}",
+                questions: currentQuizData, 
+                answers: userAnswers
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                // Redirect ไปหน้าผลคะแนน
+                window.location.href = data.redirect_url;
+            } else {
+                alert("เกิดข้อผิดพลาด: " + data.error);
+                document.getElementById('quizLoading').style.display = 'none';
+                document.getElementById('quizContainer').style.display = 'block';
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("เชื่อมต่อล้มเหลว");
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,155 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}บันทึกสรุปการเรียน{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { 
+        font-family: kanit, sans-serif;
+        background-color: #F0F2F5; 
+    }
+    .container { 
+        max-width: 900px; 
+        margin: 40px auto; 
+        padding: 0 15px; 
+    }
+    .navbar { 
+        background: var(--card-bg); 
+        padding: 1rem 2rem; 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+        position: sticky; 
+        top: 0; 
+        z-index: 100; 
+    }
+    .logo-icon { 
+        height: 40px; 
+    }
+    .nav-left { 
+        display: flex; 
+        align-items: center; 
+        gap: 10px; 
+        font-weight: 600; 
+        color: var(--primary); 
+        font-size: 1.2rem; 
+    }
+    .profile-container { 
+        position: relative; 
+        cursor: pointer; 
+        display: flex; 
+        align-items: center; 
+    }
+    .profile-popup { 
+        display: none; 
+        position: absolute; 
+        top: 60px; 
+        right: 0; 
+        width: 250px; 
+        background-color: #fff; 
+        border-radius: 8px; 
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+        z-index: 1000; padding: 1rem; 
+    }
+    .profile-popup-header { 
+        text-align: center; 
+        padding-bottom: 1rem; 
+        border-bottom: 1px solid #eee; 
+    }
+    .profile-img { 
+        width: 40px; 
+        height: 40px; 
+        background: #E0E0E0; 
+        border-radius: 50%; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        font-weight: bold; 
+        color: #555; 
+        margin-right: 10px; 
+    }
+    .page-title { 
+        font-size: 1.8rem; 
+        font-weight: 700; 
+        color: #2C3E50; 
+        margin-bottom: 20px; 
+    }
+    .summary-grid { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+        gap: 20px; 
+    }
+
+    .summary-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        transition: transform 0.2s, box-shadow 0.2s;
+        border-left: 5px solid #336BF9;
+        display: flex;
+        flex-direction: column;
+        height: 180px;
+        text-decoration: none; /* ทำให้ทั้งการ์ดเป็นลิ้งค์ */
+    }
+    .summary-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    }
+    
+    .card-subject { font-size: 1.2rem; font-weight: 600; color: #2C3E50; margin-bottom: 5px; }
+    .card-topic { color: #666; font-size: 0.9rem; flex-grow: 1; }
+    .card-date { font-size: 0.8rem; color: #999; margin-top: auto; border-top: 1px solid #eee; padding-top: 10px; }
+    
+    .empty-state { text-align: center; padding: 50px; color: #888; }
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="navbar">
+    <div class="nav-left">
+        <img class="logo-icon" src="{% static 'images/logo.png' %}" alt="Logo">
+        <span>Smart Study Planner</span>
+    </div>
+    <div class="profile-container" onclick="togglePopup()">
+        <div class="profile-img">{{ user.username|make_list|first|upper }}</div>
+        <span style="font-weight: bold;">{{ user.username }}</span>
+        <div id="profile-popup" class="profile-popup">
+            <div class="profile-popup-header">
+                <div class="profile-img">
+                    {{ user.username|make_list|first|upper }}
+                </div>
+                <h4>{{ user.first_name }} {{ user.last_name }}</h4>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1 class="page-title">สมุดบันทึกสรุป</h1>
+        <a href="{% url 'home_page' %}" class="btn" style="background:#ddd; padding:8px 15px; border-radius:8px; text-decoration:none; color:#333;">กลับ</a>
+    </div>
+
+    {% if summaries %}
+        <div class="summary-grid">
+            {% for item in summaries %}
+            <a href="{% url 'study_summary' item.session.session_id %}" class="summary-card">
+                <div class="card-subject">{{ item.subject.name }}</div>
+                <div class="card-topic">{{ item.session.topic|default:"สรุปเนื้อหา"|truncatechars:60 }}</div>
+                <div class="card-date">
+                    <i class="far fa-calendar-alt"></i> {{ item.created_at|date:"d M Y" }}
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-book" style="font-size: 3rem; margin-bottom: 15px; color:#ddd;"></i>
+            <p>ยังไม่มีบันทึกสรุป เริ่มเรียนและกดสรุปเนื้อหาได้เลย!</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

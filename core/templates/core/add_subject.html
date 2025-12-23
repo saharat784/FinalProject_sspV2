@@ -1,0 +1,917 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&display=swap');
+
+    body { 
+        background-color: #f0f2f5; 
+        font-family: 'Kanit', sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    .navbar { 
+        display: flex;
+        align-items: center;
+        padding: 1.25rem 2rem;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 0;
+    }
+    .navbar-brand { 
+        display: flex;
+        align-items: center;
+        font-weight: 600; 
+        font-size: 1.1rem; 
+        color: #336BF9; 
+        text-decoration: none;
+        gap: 0.5rem;
+    }
+    .progress-indicator {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 2rem;
+        gap: 2rem;
+    }
+    .progress-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        color: #aaa;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+    .progress-step.active {
+        color: #007bff;
+        font-weight: 600;
+    }
+    .progress-step .dot {
+        width: 32px;
+        height: 32px;
+        background-color: #ddd;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+        font-size: 0.85rem;
+        transition: all 0.3s ease;
+    }
+    .progress-step.active .dot {
+        background-color: #007bff;
+        color: white;
+    }
+    .progress-line {
+        width: 60px;
+        height: 2px;
+        background-color: #ddd;
+        margin: 0 1rem;
+    }
+    .progress-line.active {
+        background-color: #28a745;
+    }
+    .container { 
+        max-width: 1100px; /* ปรับให้กว้างขึ้นเล็กน้อยเพื่อให้ 2 กล่องวางคู่กันสวยขึ้น */
+        margin: 2rem auto;
+        padding: 0 1rem; 
+    }
+    
+    .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    .page-title { 
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2c3e50; 
+        margin: 0.5rem 0 0.5rem 0;
+    }
+    .page-subtitle {
+        font-size: 1rem;
+        color: #6c757d;
+        margin: 0;
+    }
+
+    /* --- ส่วนที่เพิ่มใหม่: จัด Layout แนวนอน --- */
+    .add-subject-box {
+        display: flex;
+        justify-content: space-between;
+        align-items: stretch;
+        gap: 20px;
+        margin-bottom: 1.5rem;
+        height: 800px; /* กำหนดความสูงเท่ากัน */
+    }
+    /* --------------------------------------- */
+
+    .add-subject-card { 
+        background: #fff; 
+        border-radius: 16px; 
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
+        padding: 2rem; 
+        /* margin-bottom: 1.5rem; เอาออกเพราะ Flex จัดการให้แล้ว */
+        width: 48%; /* ปรับให้เกือบครึ่งหนึ่ง */
+        box-sizing: border-box;
+    }
+    .add-subject-card h2 { 
+        font-size: 1.3rem; 
+        font-weight: 600;
+        margin-bottom: 1.5rem; 
+        color: #2c3e50;
+    }
+    .form-group { 
+        margin-bottom: 1.5rem; 
+    }
+    .form-group label { 
+        display: block; 
+        font-weight: 500; 
+        margin-bottom: 0.5rem; 
+        color: #2c3e50;
+    }
+    .form-control { 
+        width: 100%; 
+        padding: 0.875rem; 
+        border: 1px solid #dee2e6; 
+        border-radius: 8px; 
+        font-size: 1rem;
+        box-sizing: border-box;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .form-control:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    }
+    
+    .error-text {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+    .subject-list-section { 
+        background: #fff; 
+        border-radius: 12px; 
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
+        padding: 2rem; 
+        /* margin-bottom: 1.5rem; เอาออกเพราะ Flex จัดการให้แล้ว */
+        width: 48%; /* ปรับให้เกือบครึ่งหนึ่ง */
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    .list-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .subject-list-section h2 { 
+        font-size: 1.3rem; 
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0;
+    }
+    .subject-count {
+        background-color: #007bff;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    .subject-list { 
+        list-style: none; 
+        padding: 0; 
+        margin: 0;
+        flex-grow: 1;
+        overflow-y: auto;
+        padding-right: 5px;
+    }
+    .subject-list::-webkit-scrollbar {
+        width: 6px;
+    }
+    .subject-list::-webkit-scrollbar-track {
+        background: #f1f1f1; 
+        border-radius: 10px;
+    }
+    .subject-list::-webkit-scrollbar-thumb {
+        background: #ccc; 
+        border-radius: 10px;
+    }
+    .subject-list::-webkit-scrollbar-thumb:hover {
+        background: #aaa; 
+    }
+    .subject-item { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        padding: 1rem 1.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid #DBDBDB;
+        border-radius: 10px; 
+    }
+    .subject-item:last-child { 
+        border-bottom: none; 
+    }
+    .subject-info {
+        flex-grow: 1;
+    }
+    .subject-name {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.25rem;
+    }
+    .subject-meta {
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+    .subject-actions { 
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+    .action-icon {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        background: none;
+        border: none;
+        font-size: 1.1rem;
+    }
+    .action-icon:hover {
+        background-color: #f8f9fa;
+    }
+    .delete-btn:hover {
+        background-color: #ffebee;
+        color: #d32f2f;
+    }
+    .empty-state {
+        text-align: center;
+        color: #6c757d;
+        font-style: italic;
+        padding: 2rem 0;
+    }
+    .suggestions-section {
+        background: #fff8e1;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        /* border-bottom: 2px solid #ffc107; */
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .suggestions-section h3 {
+        color: #e65100;
+        margin: 0.5rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+    .suggestions-section p {
+        color: #bf6000;
+        margin: 0.5rem;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+    .nav-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin: 2rem;
+        gap: 1rem;
+    }
+    .btn { 
+        padding: 0.875rem 2rem; 
+        border: none; 
+        border-radius: 25px; 
+        cursor: pointer; 
+        font-weight: 600; 
+        text-decoration: none; 
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    .btn-primary { 
+        background-color: #007bff; 
+        color: white;
+        width: 70px;
+        border-radius: 10px; 
+    }
+    .btn-primary:hover {
+        background-color: #0056b3;
+        transform: translateY(-1px);
+    }
+    .btn-secondary { 
+        background-color: #e0e0e0; 
+        color: #333;
+        width: 70px;
+        border-radius: 10px; 
+    }
+    .btn-secondary:hover {
+        background-color: #545b62;
+        transform: translateY(-1px);
+    }
+    .btn-add { 
+        background: #336BF9; 
+        color: white;
+        /* margin-top: 180px; */
+        width: 100%;
+        height: 45px;
+        border-radius: 10px;
+        border-color: #336BF9;
+        font-size: 1rem;
+    }
+    .btn-add:hover {
+        background: #336BF9;
+        transform: translateY(-1px);
+    }
+    .btn.disabled { 
+        background-color: #e9ecef; 
+        color: #6c757d; 
+        cursor: not-allowed; 
+        pointer-events: none; 
+        transform: none;
+    }
+
+    /* --- ส่วน Responsive ที่ปรับปรุง --- */
+    @media (max-width: 768px) {
+        .container {
+            padding: 0 0.5rem;
+        }
+        /* สั่งให้กลับมาเรียงแนวตั้ง */
+        .add-subject-box {
+            flex-direction: column;
+            height: auto;
+        }
+        /* สั่งให้เต็มจอในมือถือ */
+        .add-subject-card, 
+        .subject-list-section {
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+        .form-section, .list-section, .suggestions-section {
+            padding: 1.5rem;
+        }
+        .page-title {
+            font-size: 1.75rem;
+        }
+        .nav-buttons {
+            flex-direction: column;
+        }
+        .btn {
+            width: 100%;
+        }
+        .subject-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        .subject-actions {
+            align-self: flex-end;
+        }
+    }
+    /* -------------------------------- */
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    .form-section, .list-section, .suggestions-section {
+        animation: fadeIn 0.5s ease-out;
+    }
+    .plus-icon { 
+        font-size: 1.2rem; 
+    }
+
+    /* CSS สำหรับรายการไฟล์ Preview */
+.file-preview-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    /* เงื่อนไข: แสดงไฟล์ 2 ไฟล์แรก (ความสูงประมาณ 2 row) ถ้าเกินให้ Scroll */
+    max-height: 90px; 
+    overflow-y: auto;
+    border: 1px solid #e1e5e9;
+    border-radius: 8px;
+    background: #f8f9fa;
+}
+
+/* ปรับแต่ง Scrollbar */
+.file-preview-list::-webkit-scrollbar {
+    width: 6px;
+}
+.file-preview-list::-webkit-scrollbar-thumb {
+    background: #ccc; 
+    border-radius: 10px;
+}
+
+.file-preview-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9rem;
+    background: white;
+    transition: background 0.2s;
+}
+
+.file-preview-item:last-child {
+    border-bottom: none;
+}
+
+.file-preview-item:hover {
+    background-color: #f1f3f5;
+}
+
+.file-order {
+    background-color: #667eea;
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: bold;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+.file-name {
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 10px;
+    color: #333;
+}
+
+.file-size {
+    font-size: 0.75rem;
+    color: #888;
+    margin-right: 10px;
+}
+
+.btn-remove-file {
+    color: #e74c3c;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 4px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.btn-remove-file:hover {
+    background-color: #fde8e8;
+    color: #c0392b;
+}
+/* --- CSS สำหรับ Delete Modal --- */
+.delete-modal-overlay {
+    display: none; /* ซ่อนไว้ก่อน */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* พื้นหลังสีดำจางๆ */
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.delete-modal-overlay.show {
+    opacity: 1;
+}
+
+.delete-modal-box {
+    background: white;
+    padding: 2rem;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    transform: scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.delete-modal-overlay.show .delete-modal-box {
+    transform: scale(1);
+}
+
+.delete-icon-circle {
+    width: 60px;
+    height: 60px;
+    background-color: #fee2e2;
+    color: #ef4444;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin: 0 auto 1.5rem;
+}
+
+.delete-modal-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.delete-modal-text {
+    color: #6b7280;
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.delete-modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.btn-modal-cancel {
+    background-color: #f3f4f6;
+    color: #374151;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-family: 'Kanit', sans-serif;
+}
+
+.btn-modal-cancel:hover {
+    background-color: #e5e7eb;
+}
+
+.btn-modal-confirm {
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-family: 'Kanit', sans-serif;
+}
+
+.btn-modal-confirm:hover {
+    background-color: #dc2626;
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="navbar">
+    <a href="{% url 'home_page' %}" class="navbar-brand">
+        เพิ่มวิชาเรียน
+    </a>
+</nav>
+
+<div class="container">
+    <div class="progress-indicator">
+        <div class="progress-step active">
+            <div class="dot">1</div>
+            <span>เพิ่มวิชา</span>
+        </div>
+        <div class="progress-line"></div>
+        <div class="progress-step ">
+            <div class="dot">2</div>
+            <span>กำหนดเวลาว่าง</span>
+        </div>
+        <div class="progress-line"></div>
+        <div class="progress-step">
+            <div class="dot">3</div>
+            <span>สร้างตาราง</span>
+        </div>
+    </div>
+
+    <div class="page-header">
+        <h1 class="page-title">เพิ่มวิชาเรียน</h1>
+        <p class="page-subtitle">เพิ่มวิชาที่ต้องการเรียนและระดับ</p>
+    </div>
+
+    <div class="add-subject-box">
+        <div class="add-subject-card">
+            <h2>เพิ่มวิชาใหม่</h2>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label for="{{ form.name.id_for_label }}">ชื่อวิชา</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                        <small class="error-text">{{ form.name.errors|first }}</small>
+                    {% endif %}
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label for="{{ form.difficulty.id_for_label }}">ระดับความยาก</label>
+                        {{ form.difficulty }}
+                    </div>
+
+                    <!-- <div class="form-group half">
+                        <label for="{{ form.importance.id_for_label }}">ลำดับความสำคัญ</label>
+                        {{ form.importance }}
+                    </div> -->
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.exam_date.id_for_label }}">วันและเวลาที่สอบ</label>
+                    {{ form.exam_date }}
+                    {% if form.exam_date.errors %}
+                        <small class="error-text">{{ form.exam_date.errors|first }}</small>
+                    {% endif %}
+                </div>
+
+                <!-- <div class="form-group">
+                    <label for="file-upload">ไฟล์ประกอบการเรียน (เลือกได้หลายไฟล์)</label>
+                    <input type="file" name="files" id="file-upload" class="form-control" multiple>
+                    <small style="color: #666; font-size: 0.85rem;">รองรับ .pdf, .docx, .pptx, .txt</small>
+                </div> -->
+
+                <div class="form-group">
+                    <label for="file-upload" style="font-weight: 600; color: #2c3e50;">
+                        <!-- <i class="fas fa-file-upload"></i>  -->
+                        ไฟล์ประกอบการเรียน (เลือกได้หลายไฟล์)
+                    </label>
+
+                    <input type="file" name="files" id="file-upload" class="form-control" multiple accept=".pdf,.docx,.pptx,.txt" onchange="handleFileSelect(event)">
+                    <small style="color: #666; font-size: 0.85rem; display: block; margin-top: 5px;">
+                        รองรับ .pdf, .docx, .pptx, .txt (สูงสุด 5 ไฟล์, ไม่เกิน 10MB/ไฟล์)
+                    </small>
+                </div>
+
+                <div class="form-group" id="file-preview-container" style="display: none;">
+                    <label style="font-weight: 600; color: #2c3e50; margin-bottom: 8px; display: block;">
+                        ไฟล์ที่เลือกแล้ว (<span id="file-count">0</span>)
+                    </label>
+
+                    <ul id="file-list" class="file-preview-list">
+                        </ul>
+                </div>
+
+                <button type="submit" class="btn-add">
+                    <span class="plus-icon"></span> เพิ่มวิชา
+                </button>
+            </form>
+        </div>
+
+        <div class="subject-list-section">
+            <h3>รายวิชาของคุณ</h3>
+            <ul class="subject-list">
+                {% for subject in subjects %}
+                <li class="subject-item">
+                    <div class="subject-info">
+                        <div class="subject-name">{{ subject.name }}</div>
+                        <div class="subject-details">
+                            <span class="badge difficulty-{{ subject.difficulty }}">
+                                {% if subject.difficulty == 1 %}ง่าย
+                                {% elif subject.difficulty == 2 %}ปานกลาง
+                                {% else %}ยาก{% endif %}
+                            </span>
+
+                            <!-- <span class="badge importance-{{ subject.importance }}" style="background-color: #e3f2fd; color: #1565c0; margin-left: 5px;">
+                                {% if subject.importance == 1 %}สำคัญน้อย
+                                {% elif subject.importance == 2 %}ปานกลาง
+                                {% else %}สำคัญมาก{% endif %}
+                            </span> -->
+
+                            {% if subject.exam_date %}
+                            • สอบ: {{ subject.exam_date|date:"d/m/Y H:i" }}
+                            {% endif %}
+
+                        </div>
+                    </div>
+                    <div class="subject-actions">
+                        <div class="subject-actions">
+                            <button type="button" class="action-icon delete-btn" 
+                                    onclick="openDeleteModal('{% url 'delete_subject' subject.subject_id %}', '{{ subject.name|escapejs }}')" 
+                                    title="ลบวิชา">
+                                ลบ
+                            </button>
+                        </div>
+                    </div>
+                </li>
+                {% empty %}
+                <li class="empty-state">ยังไม่มีวิชาที่เพิ่ม</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Suggestions Section -->
+    <div class="suggestions-section">
+        <h3>คำแนะนำสำหรับการเพิ่มวิชา</h3>
+        <p>แนะนำให้เพิ่มวิชาที่สำคัญและต้องการเรียนก่อน จากนั้นจึงค่อยเพิ่มวิชาเสริมอื่นๆ เพื่อให้ระบบสามารถสร้างแผนการเรียนที่เหมาะสมได้</p>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModalOverlay" class="delete-modal-overlay">
+        <div class="delete-modal-box">
+            <div class="delete-icon-circle">
+                <i class="fas fa-trash-alt"></i>
+            </div>
+            <h3 class="delete-modal-title">ยืนยันการลบวิชา</h3>
+            <p class="delete-modal-text">
+                คุณต้องการลบวิชา "<span id="deleteSubjectName" style="font-weight: 600; color: #333;"></span>" ใช่หรือไม่?<br>
+                การกระทำนี้ไม่สามารถย้อนกลับได้
+            </p>
+
+            <form id="deleteForm" method="post">
+                {% csrf_token %}
+                <div class="delete-modal-actions">
+                    <button type="button" class="btn-modal-cancel" onclick="closeDeleteModal()">ยกเลิก</button>
+                    <button type="submit" class="btn-modal-confirm">ลบวิชา</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="nav-buttons">
+        <a href="{% url 'home_page' %}" class="btn btn-secondary">ย้อนกลับ</a>
+        <a href="{% url 'set_schedule' %}" class="btn btn-primary {% if not subjects %}disabled{% endif %}">ถัดไป</a>
+    </div>
+</div>
+
+<script>
+    // ตัวแปรเก็บไฟล์ที่เลือกไว้ (เพื่อจัดการการลบ/เพิ่ม)
+    let selectedFiles = new DataTransfer();
+
+    function handleFileSelect(event) {
+        const input = event.target;
+        const newFiles = Array.from(input.files);
+        
+        // 1. ตรวจสอบเงื่อนไข
+        const MAX_FILES = 5;
+        const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+        const ALLOWED_TYPES = ['.pdf', '.docx', '.pptx', '.txt'];
+
+        // ถ้าจำนวนไฟล์รวมของเดิมเกิน 5
+        if (selectedFiles.files.length + newFiles.length > MAX_FILES) {
+            alert(`เพิ่มได้สูงสุด ${MAX_FILES} ไฟล์เท่านั้น`);
+            // Reset input ให้เป็นค่าเดิม (ไม่รับไฟล์ใหม่ชุดนี้)
+            input.files = selectedFiles.files;
+            return;
+        }
+
+        let hasError = false;
+
+        newFiles.forEach(file => {
+            // เช็คขนาด
+            if (file.size > MAX_SIZE) {
+                alert(`ไฟล์ "${file.name}" มีขนาดใหญ่เกิน 10MB`);
+                hasError = true;
+                return;
+            }
+            // เช็คนามสกุล
+            const ext = '.' + file.name.split('.').pop().toLowerCase();
+            if (!ALLOWED_TYPES.includes(ext)) {
+                alert(`ไฟล์ "${file.name}" นามสกุลไม่ถูกต้อง (รองรับเฉพาะ .pdf, .docx, .pptx, .txt)`);
+                hasError = true;
+                return;
+            }
+            
+            // ถ้าผ่านหมด ให้เพิ่มเข้า DataTransfer
+            selectedFiles.items.add(file);
+        });
+
+        if (!hasError) {
+            updateFileInputAndPreview();
+        } else {
+            // ถ้ามี error ให้เคลียร์ input กลับไปเป็นค่าล่าสุดที่ถูกต้อง
+            input.files = selectedFiles.files;
+        }
+    }
+
+    function removeFile(index) {
+        // สร้าง DataTransfer ตัวใหม่เพื่อเก็บไฟล์ที่เหลือ
+        const newDataTransfer = new DataTransfer();
+        const files = selectedFiles.files;
+
+        for (let i = 0; i < files.length; i++) {
+            if (i !== index) { // ข้ามไฟล์ที่ต้องการลบ
+                newDataTransfer.items.add(files[i]);
+            }
+        }
+
+        // อัปเดตตัวแปรหลัก
+        selectedFiles = newDataTransfer;
+        updateFileInputAndPreview();
+    }
+
+    function updateFileInputAndPreview() {
+        const input = document.getElementById('file-upload');
+        const listContainer = document.getElementById('file-list');
+        const container = document.getElementById('file-preview-container');
+        const countSpan = document.getElementById('file-count');
+
+        // 1. อัปเดต Input จริงๆ (เพื่อให้ Form ส่งค่าได้ถูกต้อง)
+        input.files = selectedFiles.files;
+
+        // 2. แสดง/ซ่อน Container
+        if (selectedFiles.files.length > 0) {
+            container.style.display = 'block';
+        } else {
+            container.style.display = 'none';
+        }
+        
+        countSpan.innerText = selectedFiles.files.length;
+
+        // 3. สร้าง HTML รายการไฟล์ใหม่ (Re-render)
+        listContainer.innerHTML = '';
+        
+        Array.from(selectedFiles.files).forEach((file, index) => {
+            const li = document.createElement('li');
+            li.className = 'file-preview-item';
+            
+            // แปลงขนาดไฟล์ให้สวยงาม
+            let sizeStr = '';
+            if (file.size < 1024 * 1024) {
+                sizeStr = (file.size / 1024).toFixed(1) + ' KB';
+            } else {
+                sizeStr = (file.size / (1024 * 1024)).toFixed(1) + ' MB';
+            }
+
+            li.innerHTML = `
+                <span class="file-order">${index + 1}</span>
+                <span class="file-name" title="${file.name}">${file.name}</span>
+                <span class="file-size">${sizeStr}</span>
+                <button type="button" class="btn-remove-file" onclick="removeFile(${index})" title="ลบไฟล์">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            `;
+            listContainer.appendChild(li);
+        });
+    }
+
+    const deleteModal = document.getElementById('deleteModalOverlay');
+    const deleteForm = document.getElementById('deleteForm');
+    const deleteSubjectNameSpan = document.getElementById('deleteSubjectName');
+
+    function openDeleteModal(actionUrl, subjectName) {
+        // 1. ตั้งค่า Action ของ Form ให้เป็น URL ลบของวิชานั้นๆ
+        deleteForm.action = actionUrl;
+        
+        // 2. ใส่ชื่อวิชาในข้อความ
+        deleteSubjectNameSpan.textContent = subjectName;
+        
+        // 3. แสดง Modal
+        deleteModal.style.display = 'flex';
+        // เล็กน้อยเพื่อให้ Animation ทำงาน (ต้องรอ browser render display:flex ก่อน)
+        setTimeout(() => {
+            deleteModal.classList.add('show');
+        }, 10);
+    }
+
+    function closeDeleteModal() {
+        // 1. เริ่ม Animation ปิด
+        deleteModal.classList.remove('show');
+        
+        // 2. รอ Animation จบแล้วค่อยซ่อน display
+        setTimeout(() => {
+            deleteModal.style.display = 'none';
+        }, 300);
+    }
+
+    // ปิด Modal เมื่อคลิกพื้นที่ว่างๆ รอบนอก
+    window.onclick = function(event) {
+        if (event.target == deleteModal) {
+            closeDeleteModal();
+        }
+    }
+
+</script>
+{% endblock %}

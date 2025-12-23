@@ -1,0 +1,468 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}ตั้งค่าการเรียน - Smart Planner{% endblock %}
+
+{% block extra_css %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600&display=swap');
+    :root {
+        --primary-color: #077AFE; 
+        --primary-light: #077AFE;
+        --text-color: #34495e;
+        --border-color: #e0e0e0;
+    }
+    body {
+        font-family: 'Kanit', sans-serif;
+        background-color: #f4f7f6;
+        color: var(--text-color);
+        margin: 0;
+        padding: 0;
+    }
+    .navbar {
+        display: flex;
+        align-items: center;
+        padding: 1.25rem 2rem;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 0;
+    }
+    .navbar-brand { 
+        display: flex;
+        align-items: center;
+        font-weight: 600; 
+        font-size: 1.1rem; 
+        color: #336BF9; 
+        text-decoration: none;
+        gap: 0.5rem;
+    }
+    .container { 
+        max-width: 900px; 
+        margin: 2rem auto; 
+    }
+    .progress-indicator {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 2rem;
+        gap: 2rem;
+    }
+     .progress-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        color: #aaa;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+    .progress-step.finished {
+        color: #28a745;
+        font-weight: 600;
+    }
+    .progress-step.finished .dot {
+        background-color: #28a745;
+        color: white;
+    }
+    .progress-step.finished-sec {
+        color: #28a745;
+        font-weight: 600;
+    }
+    .progress-step.finished-sec .dot {
+        background-color: #28a745;
+        color: white;
+    }
+    .progress-step.active {
+        color: #007bff;
+        font-weight: 600;
+    }
+    .progress-step .dot {
+        width: 32px;
+        height: 32px;
+        background-color: #ddd;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+        font-size: 0.85rem;
+        transition: all 0.3s ease;
+    }
+    .progress-step.active .dot {
+        background-color: #007bff;
+        color: white;
+    }
+    .progress-line {
+        width: 60px;
+        height: 3px;
+        background-color: #28a745;
+        margin: 0 1rem;
+    }
+    .progress-line-sec {
+        width: 60px;
+        height: 3px;
+        background-color: #28a745;
+        margin: 0 1rem;
+    }
+    .progress-line.active {
+        background-color: #28a745;
+    }
+    .page-header { 
+        text-align: center; 
+        margin-bottom: 2.5rem; 
+    }
+    .page-header h1 { 
+        font-size: 2rem; 
+        color: var(--text-color); 
+        font-weight: 600; 
+    }
+    .card { 
+        background: #fff; 
+        border-radius: 16px; 
+        padding: 2rem; 
+        margin-bottom: 2rem; 
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+    }
+    .card h2 { 
+        font-size: 1.25rem; 
+        font-weight: 600; 
+        margin-top: 0; 
+        margin-bottom: 1.5rem; 
+    }
+    .options-grid { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+        gap: 1rem; 
+    }
+    .option-btn {
+        background: #f8f9fa;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1rem;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.2s ease-in-out;
+    }
+    .option-btn1 {
+        background: #f8f9fa;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        padding: 0.5rem;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.2s ease-in-out;
+    }
+    .option-btn:hover { 
+        border-color: var(--primary-light); 
+        transform: translateY(-2px); 
+    }
+    .option-btn1:hover { 
+        border-color: var(--primary-light); 
+        transform: translateY(-2px); 
+    }
+    .option-btn.active {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+        font-weight: 600;
+        box-shadow: 0 4px 10px rgba(106, 27, 154, 0.2);
+    }
+    .toggle-container { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; background: #f8f9fa; 
+        padding: 1rem; 
+        border-radius: 12px; 
+    }
+    .toggle-text h3 { margin: 0; 
+        font-size: 1rem; 
+        font-weight: 500; 
+    }
+    .toggle-text p { 
+        margin: 0.25rem 0 0; 
+        font-size: 0.85rem; 
+        color: #6c757d; 
+    }
+    .toggle-switch { 
+        position: relative; 
+        display: inline-block; 
+        width: 50px; 
+        height: 28px; 
+    }
+    .toggle-switch input { 
+        opacity: 0; 
+        width: 0; 
+        height: 0; 
+    }
+    .slider { 
+        position: absolute; 
+        cursor: pointer; 
+        top: 0; 
+        left: 0; 
+        right: 0; 
+        bottom: 0; 
+        background-color: #ccc; 
+        border-radius: 28px; 
+        transition: .4s; 
+    }
+    .slider:before { 
+        position: absolute; 
+        content: ""; 
+        height: 20px; 
+        width: 20px; 
+        left: 4px; 
+        bottom: 4px; 
+        background-color: white; 
+        border-radius: 50%; 
+        transition: .4s; 
+    }
+    input:checked + .slider { 
+        background-color: var(--primary-color); 
+    }
+    input:checked + .slider:before { 
+        transform: translateX(22px); 
+    }
+    .nav-buttons { 
+        display: flex; 
+        justify-content: space-between; 
+        margin-top: 1rem; 
+    }
+    .btn { 
+        padding: 0.8rem 2rem; 
+        border-radius: 10px; 
+        font-weight: bold; 
+        text-decoration: none; 
+        border: none; 
+        cursor: pointer; 
+    }
+    .btn-back { 
+        background-color: #e0e0e0; 
+        color: #333; 
+    }
+    .btn-back:hover {
+        background-color: #5a6268;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+    }
+    .btn-save { 
+        font-size: medium;
+        background: var(--primary-color); 
+        color: #fff; 
+    }
+    .modal-overlay {
+        display: none; /* ซ่อนไว้ก่อน */
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 2000;
+        justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(5px); /* เบลอฉากหลัง */
+    }
+    .modal-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 20px;
+        width: 90%;
+        max-width: 500px;
+        position: relative;
+        animation: popUp 0.3s ease;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="navbar">
+    <a href="{% url 'set_schedule' %}" class="navbar-brand">ตั้งค่าการเรียน</a>
+</nav>
+
+<div class="container">
+    <div class="progress-indicator">
+        <div class="progress-step finished">
+            <div class="dot">1</div>
+            <span>เพิ่มวิชา</span>
+        </div>
+        <div class="progress-line"></div>
+        <div class="progress-step finished">
+            <div class="dot">2</div>
+            <span>กำหนดเวลาว่าง</span>
+        </div>
+        <div class="progress-line"></div>
+        <div class="progress-step active">
+            <div class="dot">3</div>
+            <span>สร้างแผน</span>
+        </div>
+    </div>
+
+    <div class="progress-indicator">
+        </div>
+
+    <div class="page-header">
+        <h1>ตั้งค่าการเรียนของคุณ</h1>
+        <p>ปรับแต่งระยะเวลาการเรียนและการแจ้งเตือนตามที่คุณต้องการ</p>
+    </div>
+
+    <form method="post" id="settings-form">
+        {% csrf_token %}
+        
+        <div style="display: none;">
+            {{ form.session_duration }}
+            {{ form.break_duration }}
+            {{ form.notifications_enabled }}
+        </div>
+
+        <div class="card">
+            <h2>ระยะเวลาการเรียนต่อครั้ง (นาที)</h2>
+            <div class="options-grid" id="session-duration-grid">
+                <button type="button" class="option-btn" data-value="60">60</button>
+                <button type="button" class="option-btn" data-value="90">90</button>
+                <button type="button" class="option-btn" data-value="120">120</button>
+                <button type="button" class="option-btn" data-value="180">180</button>
+                <button type="button" class="option-btn" data-value="240">240</button>
+                <input type="number" id="custom-session" class="option-btn1" placeholder="กำหนดเอง (นาที)">
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>ระยะเวลาพักผ่อน (นาที)</h2>
+            <div class="options-grid" id="break-duration-grid">
+                <button type="button" class="option-btn" data-value="5">5</button>
+                <button type="button" class="option-btn" data-value="10">10</button>
+                <button type="button" class="option-btn" data-value="15">15</button>
+                <button type="button" class="option-btn" data-value="20">20</button>
+                <button type="button" class="option-btn" data-value="30">30</button>
+                <input type="number" id="custom-break" class="option-btn1" placeholder="กำหนดเอง (นาที)">
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>การแจ้งเตือน</h2>
+            <div class="toggle-container">
+                <div class="toggle-text">
+                    <h3>เปิดการแจ้งเตือน</h3>
+                    <p>รับการแจ้งเตือนเมื่อถึงเวลาเรียนและพักผ่อน</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="notification-toggle"> 
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="{% url 'set_schedule' %}" class="btn btn-back">ย้อนกลับ</a>
+            <button type="submit" class="btn btn-save">บันทึกและสร้างตาราง</button>
+        </div>
+
+        <div id="loadingModal" class="modal-overlay">
+        <div class="modal-content" style="text-align: center; padding: 40px;">
+            <i class="fas fa-robot fa-bounce" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 20px;"></i>
+            <h3 style="color: #2C3E50; margin-bottom: 10px;">กำลังประมวลผลและสร้างตาราง...</h3>
+            <p style="color: #666;">กรุณารอสักครู่ ระบบกำลังวิเคราะห์และบันทึกข้อมูล</p>
+        </div>
+    </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. จัดการ Session Duration
+    const sessionHidden = document.getElementById('id_session_duration');
+    const sessionButtons = document.querySelectorAll('#session-duration-grid .option-btn');
+    const sessionCustom = document.getElementById('custom-session');
+
+    function updateSelection(buttons, customInput, hiddenInput, value) {
+        // Reset classes
+        buttons.forEach(btn => btn.classList.remove('active'));
+        customInput.classList.remove('active');
+
+        // Check if value matches a button
+        let matched = false;
+        buttons.forEach(btn => {
+            if (btn.dataset.value === value) {
+                btn.classList.add('active');
+                matched = true;
+                customInput.value = ''; // clear custom if preset selected
+            }
+        });
+
+        // If not matched, it's custom
+        if (!matched && value) {
+            customInput.classList.add('active');
+            customInput.value = value;
+        }
+        
+        // Update hidden form
+        hiddenInput.value = value;
+    }
+
+    // Event Listeners for Session Buttons
+    sessionButtons.forEach(btn => {
+        btn.addEventListener('click', () => updateSelection(sessionButtons, sessionCustom, sessionHidden, btn.dataset.value));
+    });
+
+    // Event Listener for Session Custom Input
+    sessionCustom.addEventListener('input', function() {
+        // Clear buttons active state
+        sessionButtons.forEach(btn => btn.classList.remove('active'));
+        this.classList.add('active');
+        sessionHidden.value = this.value;
+    });
+
+    // 2. จัดการ Break Duration (Logic เดียวกัน)
+    const breakHidden = document.getElementById('id_break_duration');
+    const breakButtons = document.querySelectorAll('#break-duration-grid .option-btn');
+    const breakCustom = document.getElementById('custom-break');
+
+    breakButtons.forEach(btn => {
+        btn.addEventListener('click', () => updateSelection(breakButtons, breakCustom, breakHidden, btn.dataset.value));
+    });
+
+    breakCustom.addEventListener('input', function() {
+        breakButtons.forEach(btn => btn.classList.remove('active'));
+        this.classList.add('active');
+        breakHidden.value = this.value;
+    });
+
+    // 3. จัดการ Notifications
+    const notifHidden = document.getElementById('id_notifications_enabled');
+    const notifToggle = document.getElementById('notification-toggle');
+
+    if(notifToggle && notifHidden) {
+        // Set initial state from Django form
+        notifToggle.checked = notifHidden.checked;
+        
+        notifToggle.addEventListener('change', function() {
+            notifHidden.checked = this.checked;
+        });
+    }
+
+    // Initialize values from DB (ถ้ามีค่าเดิมให้ highlight ปุ่ม)
+    if(sessionHidden.value) updateSelection(sessionButtons, sessionCustom, sessionHidden, sessionHidden.value);
+    if(breakHidden.value) updateSelection(breakButtons, breakCustom, breakHidden, breakHidden.value);
+
+    const form = document.getElementById('settings-form');
+        const loadingModal = document.getElementById('loadingModal');
+
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                // เมื่อกดปุ่ม submit ให้แสดง Modal ทันที
+                // ไม่ต้อง e.preventDefault() เพราะเราต้องการให้ฟอร์มส่งข้อมูลไป Server ตามปกติ
+                if (loadingModal) {
+                    loadingModal.style.display = 'flex';
+                }
+            });
+        }
+});
+</script>
+{% endblock %}

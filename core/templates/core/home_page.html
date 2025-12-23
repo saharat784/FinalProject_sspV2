@@ -1,0 +1,884 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}หน้าแรก - Smart Study Planner{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary: #336BF9;
+        --primary-dark: #2554D1;
+        --secondary: #6C757D;
+        --success: #2ECC71;
+        --bg-color: #EDF0F9;
+        --card-bg: #FFFFFF;
+        --text-dark: #2C3E50;
+        --text-grey: #666666;
+        --text-light-grey: #888888;
+        --danger: #FF6B6B;
+        --danger-bg: #FFF5F5;
+        --border-color: #E0E0E0;
+    }
+    
+    body {
+        font-family: 'Kanit', sans-serif;
+        background-color: var(--bg-color);
+        margin: 0;
+        padding-bottom: 30px;
+    }
+
+    /* --- Navbar & Profile CSS (คงเดิม) --- */
+    .navbar { 
+        background: var(--card-bg); 
+        padding: 1rem 2rem; 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+        position: sticky; 
+        top: 0; 
+        z-index: 100; 
+    }
+    .logo-icon { 
+        height: 40px; 
+    }
+    .nav-left { 
+        display: flex; 
+        align-items: center; 
+        gap: 10px; 
+        font-weight: 600; 
+        color: var(--primary); 
+        font-size: 1.2rem; 
+    }
+    .profile-container { 
+        position: relative; 
+        cursor: pointer; 
+        display: flex; 
+        align-items: center; 
+    }
+    .profile-container:hover{
+        text-decoration: underline;
+        color: var(--primary);
+    }
+    .profile-popup { 
+        display: none; 
+        position: absolute; 
+        top: 60px; 
+        right: 0; 
+        width: 250px; 
+        background-color: #fff; 
+        border-radius: 8px; 
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+        z-index: 1000; padding: 1rem; 
+    }
+    .profile-popup-header { 
+        text-align: center; 
+        padding-bottom: 1rem; 
+        border-bottom: 1px solid #eee; 
+    }
+    .profile-img { 
+        width: 40px; 
+        height: 40px; 
+        background: #E0E0E0; 
+        border-radius: 50%; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        font-weight: bold; 
+        color: #555; 
+        margin-right: 10px; 
+    }
+    .popup-menu { 
+        list-style: none; 
+        padding: 0; 
+        margin-top: 1rem; 
+    }
+    .popup-menu li { 
+        padding: 0.75rem 0; 
+        border-bottom: 1px solid #eee; 
+    }
+    .popup-menu li a, .popup-menu li button { 
+        text-decoration: none; color: #333; 
+        background: none; 
+        border: none; 
+        width: 100%; 
+        text-align: left; 
+        cursor: pointer; 
+        font-size: 1rem; 
+    }
+    .btn-logout { 
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 0.9rem;
+        font-weight: 600;
+        padding: 0;
+        width: 100% 
+    }
+    .btn-logout:hover {
+        text-decoration: underline;
+        color: var(--danger); 
+    }
+    /* --- Container & Generic Box (คงเดิม) --- */
+    .container { 
+        max-width: 1000px; /* ขยายความกว้างเพื่อให้ตารางแสดงผลสวย */ 
+        margin: 20px auto; 
+        padding: 0 15px; 
+        display: flex; 
+        flex-direction: column; 
+        gap: 20px; 
+    }
+    .box { 
+        background: var(--card-bg); 
+        border-radius: 16px; 
+        padding: 20px; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
+    }
+    .box-title { 
+        font-size: 1.1rem; 
+        font-weight: 600; 
+        color: var(--text-dark); 
+        margin-bottom: 15px; 
+        display: flex; 
+        align-items: center; 
+        justify-content: space-between; 
+        gap: 8px; 
+    }
+
+    /* --- Progress, Task, Stats, Exams CSS (คงเดิม - ย่อไว้เพื่อความกระชับ) --- */
+    .progress-header { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: flex-end; 
+        margin-bottom: 10px; 
+    }
+    .welcome-text { 
+        font-size: 1.3rem; 
+        font-weight: 600; 
+        color: black; 
+    }
+    .progress-percent-text { 
+        font-size: 1.2rem; 
+        font-weight: bold; 
+        color: var(--primary); 
+    }
+    .progress-container { 
+        background: #E9ECEF; 
+        border-radius: 20px; 
+        height: 12px; 
+        overflow: hidden; 
+        margin-bottom: 20px; 
+    }
+    .progress-bar { 
+        background: linear-gradient(90deg, #336BF9, #9951FF); 
+        height: 100%; 
+        border-radius: 20px; 
+        transition: width 0.5s ease; 
+    }
+    .btn-start { 
+        background: var(--primary); 
+        color: white; 
+        border: none; 
+        width: 50%; 
+        left: -45%; 
+        transform: translateX(45%); 
+        padding: 12px; 
+        border-radius: 12px; 
+        font-size: 1rem; 
+        font-weight: 500; 
+        cursor: pointer; 
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        gap: 8px; 
+        text-decoration: none; 
+    }
+    .btn-start-completed {
+        background: var(--success);
+        color: white; 
+        border: none; 
+        width: 50%; 
+        left: -50%; 
+        transform: translateX(50%); 
+        padding: 12px; 
+        border-radius: 12px; 
+        font-size: 1rem; 
+        font-weight: 500; 
+        cursor: pointer; 
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        gap: 8px; 
+        text-decoration: none;
+    }
+    .btn-start-in-modal {
+        margin-top: 20px;
+        background: var(--primary); 
+        color: white; 
+        border: none; 
+        width: 100%; 
+        padding: 6px; 
+        border-radius: 12px; 
+        font-size: 1rem; 
+        font-weight: 500; 
+        cursor: pointer; 
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        gap: 8px; 
+        text-decoration: none; 
+    }
+    .stats-grid { 
+        display: grid; 
+        grid-template-columns: repeat(3, 1fr); 
+        gap: 15px; 
+        text-align: center; 
+    }
+    .stat-item h3 { 
+        font-size: 1.5rem; 
+        margin: 0; 
+        color: var(--primary); 
+    }
+    .exam-item { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        padding: 10px; 
+        background: #e5f1e6; 
+        border-radius: 10px; 
+        margin-bottom: 10px; 
+        /* border-left: 4px solid #12B92B;  */
+    }
+    .exam-days { 
+        color: white; 
+        padding: 4px 10px; 
+        border-radius: 20px; 
+        font-size: 1rem;
+        font-style: bold; 
+        color: #000; 
+        margin-bottom: 5px; }
+    .topic-text {
+        font-size: 0.75rem;
+        color: var(--text-grey);
+        margin-top: 4px;
+    }
+    .empty-state {
+        text-align: center;
+        color: #999;
+        padding: 20px;
+    }
+    
+    /* --- Task/Plan List --- */
+    .task-scroll-area {
+        max-height: 350px; /* ความสูงสำหรับโชว์ประมาณ 5 รายการ */
+        overflow-y: auto;  /* สั่งให้มี Scrollbar แนวตั้งถ้าเนื้อหายาวเกิน */
+        padding-right: 5px; /* เว้นที่ทางขวานิดหน่อยไม่ให้ Scrollbar ทับเนื้อหา */
+    }
+
+    /* ปรับแต่ง Scrollbar ให้สวยงาม (Optional) */
+    .task-scroll-area::-webkit-scrollbar {
+        width: 6px;
+    }
+    .task-scroll-area::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+    .task-scroll-area::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 4px;
+    }
+    .task-scroll-area::-webkit-scrollbar-thumb:hover {
+        background: #bbb;
+    }
+    .task-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #F0F0F0;
+    }
+    .task-row:last-child {
+        border-bottom: none;
+    }
+    .task-info {
+        flex-grow: 1;
+    }
+    .task-time {
+        font-size: 0.85rem;
+        color: var(--text-light-grey);
+        background: #F0F2F5;
+        padding: 2px 8px;
+        border-radius: 4px;
+        display: inline-block;
+        margin-bottom: 4px;
+    }
+    .task-subject {
+        font-weight: 500;
+    }
+    .task-topic {
+        color: var(--text-light-grey);
+        font-size: 0.85rem;
+    }
+    .check-circle {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 2px solid #DDD;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        color: transparent;
+        text-decoration: none;
+    }
+    .check-circle.completed {
+        background: var(--success);
+        border-color: var(--success);
+        color: white;
+    }
+    .btn-add-floating { 
+        bottom: 20px;
+        left: 50%;
+        margin-top: 10px;
+        background: linear-gradient(135deg, #336BF9, #9951FF);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 20px;
+        font-weight: 600;
+        box-shadow: 0 4px 20px rgba(51, 107, 249, 0.4);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        z-index: 99;
+        transition: transform 0.2s;
+    } 
+    .btn-add-floating:hover { 
+        transform: translateY(-3px); 
+        box-shadow: 0 6px 25px rgba(51, 107, 249, 0.5); 
+    }
+    
+    /* CALENDAR STYLES */
+    .calendar-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .calendar-controls input[type="date"] {
+        padding: 5px 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-family: 'Kanit', sans-serif;
+        color: var(--text-dark);
+    }
+    .calendar-wrapper {
+        overflow-x: auto;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+    }
+    .calendar-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 800px; /* บังคับความกว้างขั้นต่ำเพื่อให้ scroll */
+    }
+    .calendar-table th, .calendar-table td {
+        border-right: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-color);
+        padding: 8px;
+        text-align: center;
+        vertical-align: top;
+    }
+    .calendar-table th {
+        background-color: #F8F9FA;
+        color: var(--text-grey);
+        font-weight: 500;
+        font-size: 0.9rem;
+        height: 40px;
+    }
+    .calendar-table th.time-col {
+        width: 60px;
+        background-color: #fff;
+    }
+    .calendar-table th.today-col {
+        background-color: #EBF5FF; /* สีไฮไลท์วันปัจจุบัน */
+        color: var(--primary);
+        font-weight: 700;
+    }
+    .calendar-table td.time-cell {
+        font-size: 0.8rem;
+        color: var(--text-light-grey);
+        background-color: #fff;
+        vertical-align: middle;
+    }
+    .btn-sync {
+        background-color: #4285F4; 
+        color: white; 
+        padding: 0.75rem 1.5rem; 
+        border: none; 
+        border-radius: 8px; 
+        font-size: 1rem; 
+        cursor: pointer; 
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: background-color 0.3s ease;
+    }
+    /* Event Card in Calendar */
+    .cal-event {
+        background-color: #E3F2FD;
+        color: var(--primary-dark);
+        padding: 4px 6px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        text-align: left;
+        margin-bottom: 4px;
+        cursor: pointer;
+        transition: transform 0.2s;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .cal-event:hover {
+        transform: scale(1.02);
+        background-color: #BBDEFB;
+    }
+    .cal-event-time {
+        font-size: 0.7rem;
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
+    .cal-event-subject {
+        font-weight: 600;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    /* POPUP MODAL STYLES */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 2000;
+        justify-content: center;
+        align-items: center;
+    }
+    .modal-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 16px;
+        width: 100%;
+        max-width: 400px;
+        position: relative;
+        animation: slideUp 0.3s ease;
+    }
+    @keyframes slideUp {
+        from { transform: translateY(20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+    .modal-close {
+        position: absolute;
+        top: 15px; right: 15px;
+        background: none; border: none;
+        font-size: 1.5rem; cursor: pointer; color: #999;
+    }
+    .modal-header h3 { 
+        margin: 0; 
+        color: var(--primary); 
+    }
+    .modal-body { 
+        margin-top: 1rem; 
+    }
+    .modal-row { 
+        display: flex; 
+        margin-bottom: 10px; 
+    }
+    .modal-label { 
+        width: 100px; 
+        font-weight: 600; 
+        color: var(--text-grey); 
+    }
+    .modal-value { 
+        color: var(--text-dark); 
+        flex: 1; 
+    }
+    .modal-status-badge {
+        padding: 4px 10px; 
+        border-radius: 20px; font-size: 0.8rem;
+        background: #eee; color: #555;
+    }
+    .modal-status-badge.completed { 
+        background: #d4edda; 
+        color: #155724; 
+    }
+    /* --- Flash Message Popup CSS --- */
+    .flash-message-container {
+        position: fixed;
+        top: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 9999; /* ให้ลอยอยู่เหนือทุกอย่าง */
+        width: auto;
+        min-width: 300px;
+        max-width: 90%;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        pointer-events: none; /* เพื่อให้คลิกทะลุได้ถ้าไม่ได้คลิกที่กล่อง */
+    }
+
+    .alert {
+        padding: 15px 25px;
+        border-radius: 50px; /* ทรงแคปซูลมนๆ */
+        background-color: #fff;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        font-weight: 500;
+        font-size: 1rem;
+        animation: slideDown 0.5s ease-out;
+        pointer-events: auto; /* ให้ตัวกล่องรับคลิกได้ */
+        border: none; /* ลบขอบเดิม */
+    }
+
+    .alert-success {
+        background-color: #E8F5E9; /* สีเขียวอ่อน */
+        color: #2E7D32;
+        border: 1px solid #C8E6C9;
+    }
+
+    .alert-info, .alert-warning, .alert-error {
+        background-color: #FFF3E0;
+        color: #E65100;
+        border: 1px solid #FFE0B2;
+    }
+
+    @keyframes slideDown {
+        from { transform: translateY(-100%); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes fadeOut {
+        to { opacity: 0; transform: translateY(-20px); }
+    }
+    
+</style>
+{% endblock %}
+
+{% block content %}
+    <nav class="navbar">
+        <!-- Logo Section -->
+        <div class="nav-left">
+            <img class="logo-icon" src="{% static 'images/logo.png' %}" alt="Logo">
+            <span>Smart Study Planner</span>
+        </div>
+
+        <!-- Profile Section -->
+        <div class="profile-container" onclick="togglePopup()">
+            <div class="profile-img">{{ user.username|make_list|first|upper }}</div>
+            <span style="font-weight: bold;">{{ user.username }}</span>
+            <div id="profile-popup" class="profile-popup">
+                <div class="profile-popup-header">
+                    <div class="profile-img">
+                        {{ user.username|make_list|first|upper }}
+                    </div>
+                    <h4>{{ user.first_name }} {{ user.last_name }}</h4>
+                </div>
+                <ul class="popup-menu">
+                    <li><a href="#">แก้ไขโปรไฟล์</a></li>
+                    <li><a href="#">ความคืบหน้า</a></li>
+                    <li><a href="#">สร้างแผนใหม่</a></li>
+                    <li><a href="{% url 'summary_history' %}">สมุดบันทึกสรุป</a></li>
+                    <li><a href="#">การแจ้งเตือน</a></li>
+                    <li>
+                        <form action="{% url 'logout' %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-logout">ออกจากระบบ</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Top Messages Container -->
+    <div class="container container-top">
+        {% if messages %}
+        <div class="flash-message-container" id="flash-messages">
+            {% for message in messages %}
+                <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-info{% endif %}">
+                    {% if message.tags == 'success' %}
+                        <i class="fas fa-check-circle"></i>
+                    {% else %}
+                        <i class="fas fa-info-circle"></i>
+                    {% endif %}
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Main Content Container -->
+    <div class="container">
+
+        <!-- Daily Progress Box -->
+        <div class="box">
+            <div class="progress-header">
+                <div>
+                    <div class="welcome-text">สวัสดี! {{ user.first_name|default:user.username }}</div>
+                    <small class="progress-subtitle">วันนี้คุณอ่านไปแล้ว {{ daily_progress }}%</small>
+                </div>
+                <div class="progress-percent-text">{{ daily_progress }}%</div>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-bar" style="width: {{ daily_progress }}%;"></div>
+            </div>
+
+            {% if next_session %}
+                <a href="{% url 'start_studying' next_session.session_id %}" class="btn-start">
+                    <span></span> เริ่มอ่าน: {{ next_session.subject.name }}
+                </a>
+            {% else %}
+                <button class="btn-start-completed"><span></span>ไม่มีวิชาที่ต้องอ่านในวันนี้</button>
+            {% endif %}
+        </div>
+
+        <!-- Weekly Calendar Box -->
+        <div class="box">
+            <div class="box-title">
+                <span>ตารางเรียนของคุณ</span>
+                <div class="calendar-controls">
+                    <label style="font-size: 0.9rem; font-weight: normal;">เลือกสัปดาห์:</label>
+                    <input type="date" id="weekPicker" value="{{ current_date_str }}" onchange="changeWeek(this.value)">
+                </div>
+            </div>
+
+            <!-- Calendar Table -->
+            <div class="calendar-wrapper">
+                <table class="calendar-table">
+                    <thead>
+                        <tr>
+                            <th class="time-col">เวลา</th>
+                            {% for day in week_dates %}
+                                <th class="{% if day == current_date_str|date:'Y-m-d' %}today-col{% endif %}">
+                                    <div>{{ day|date:"D" }}</div> <div style="font-size: 0.8rem; font-weight: normal;">{{ day|date:"d/m" }}</div>
+                                </th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in calendar_grid %}
+                        <tr>
+                            <td class="time-cell">{{ row.hour }}</td>
+                            
+                            {% for day_data in row.days %}
+                            <td>
+                                {% if day_data.sessions %}
+                                    {% for session in day_data.sessions %}
+                                        <div class="cal-event" onclick="openModal('{{ session.subject.name }}', '{{ session.start_time|date:'H:i' }} - {{ session.end_time|date:'H:i' }}', '{{ session.topic|default:'-'|escapejs }}', '{{ session.is_completed }}')">
+                                            <div class="cal-event-time">{{ session.start_time|date:"H:i" }}</div>
+                                            <div class="cal-event-subject">{{ session.subject.name }}</div>
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <a href="{% url 'add_subject' %}" class="btn-add-floating">
+                <span class="plus-icon"></span> เพิ่ม/แก้ไขวิชา
+            </a>
+            
+            {% if not calendar_grid %}
+               <div class="empty-state">ไม่พบข้อมูลตารางเรียน</div>
+            {% endif %}
+        </div>
+
+        <!-- Today's Study Plan Box -->
+        <div class="box"> 
+            <div class="box-title">แผนการอ่านวันนี้</div>
+
+            {% if today_sessions %}
+                <div class="task-scroll-area">
+                    {% for session in today_sessions %}
+                    <div class="task-row">
+                        <div class="task-info">
+                            <div class="task-time">{{ session.start_time|date:"H:i" }} - {{ session.end_time|date:"H:i" }}</div>
+                            <div class="task-subject">{{ session.subject.name }}</div>
+                            {% if session.topic %}<small class="task-topic">{{ session.topic }}</small>{% endif %}
+                        </div>
+                        <a href="{% url 'toggle_session_complete' session.session_id %}"
+                           class="check-circle {% if session.is_completed %}completed{% endif %}">
+                            {% if session.is_completed %}<i class="fas fa-check"></i>{% else %}✓{% endif %} 
+                            </a>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">วันนี้ไม่มีวิชาที่ต้องอ่าน พักผ่อนให้เต็มที่!</div>
+            {% endif %}
+        </div>
+
+        <!-- Overall Stats Box -->
+        <div class="box">
+            <div class="box-title">สถิติภาพรวม</div>
+            <div class="stats-grid">
+                <div class="stat-item"><h3>{{ total_subjects }}</h3><p>วิชาทั้งหมด</p></div>
+                <div class="stat-item"><h3>{{ total_plans }}</h3><p>แผนการอ่าน</p></div>
+                <div class="stat-item"><h3>{{ readiness_score }}%</h3><p>ความพร้อมสอบ</p></div>
+            </div>
+        </div>
+
+        <!-- Upcoming Exams Box -->
+        <div class="box">
+            <div class="box-title">การสอบที่ใกล้จะถึง</div>
+            {% if exams_data %}
+                {% for exam in exams_data %}
+                <div class="exam-item">
+                    <div>
+                        <div class="exam-name">{{ exam.name }}</div>
+                        <small class="exam-date">สอบ: {{ exam.date|date:"d M Y" }}</small>
+                    </div>
+                    <div class="exam-days">เหลือ {{ exam.days_left }} วัน</div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-exam">ไม่มีการสอบเร็วๆ นี้</div>
+            {% endif %}
+        </div>
+
+        <!-- Google Calendar Sync Box -->
+        <div class="box">
+            <div class="box-title">ซิงค์กับ Google Calendar</div>
+            <p>เชื่อมต่อแผนการเรียนของคุณกับ Google Calendar เพื่อรับการแจ้งเตือนและอัพเดทตารางเรียนแบบเรียลไทม์</p>
+            <button class="btn-sync" onclick="window.location.href='{% url 'sync_calendar' %}'">
+                <i class="fa-brands fa-google" style="margin-right: 8px;"></i> ซิงค์ตอนนี้
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Modal Popup for Event Details -->
+    <div id="eventModal" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content">
+            <button class="modal-close" onclick="document.getElementById('eventModal').style.display='none'">&times;</button>
+            <div class="modal-header">
+                <h3 id="modalSubject">Subject Name</h3>
+            </div>
+            <div class="modal-body">
+                <div class="modal-row">
+                    <div class="modal-label">เวลา:</div>
+                    <div class="modal-value" id="modalTime">10:00 - 11:00</div>
+                </div>
+                <div class="modal-row">
+                    <div class="modal-label">หัวข้อ:</div>
+                    <div class="modal-value" id="modalTopic">Topic Details</div>
+                </div>
+                <div class="modal-row">
+                    <div class="modal-label">สถานะ:</div>
+                    <div class="modal-value">
+                        <span id="modalStatus" class="modal-status-badge">Completed</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Profile Popup Logic (Original)
+        function togglePopup() {
+            const popup = document.getElementById('profile-popup');
+            popup.style.display = (popup.style.display === 'block') ? 'none' : 'block';
+        }
+        
+        document.addEventListener('click', function(event) {
+            const profileContainer = document.querySelector('.profile-container');
+            const popup = document.getElementById('profile-popup');
+            if (!profileContainer.contains(event.target) && popup.style.display === 'block') {
+                popup.style.display = 'none';
+            }
+        });
+
+        // --- NEW: Calendar Functions ---
+        
+        // 1. Change Week: Reload page with ?date=YYYY-MM-DD
+        function changeWeek(dateVal) {
+            if(dateVal) {
+                window.location.href = "?date=" + dateVal;
+            }
+        }
+
+        // 2. Open Modal: Fill data and show
+        function openModal(subject, time, topic, isCompleted) {
+            document.getElementById('modalSubject').textContent = subject;
+            document.getElementById('modalTime').textContent = time;
+            document.getElementById('modalTopic').textContent = (topic && topic !== 'None') ? topic : '-';
+            
+            const statusSpan = document.getElementById('modalStatus');
+            if(isCompleted === 'True') {
+                statusSpan.textContent = 'อ่านแล้ว';
+                statusSpan.classList.add('completed');
+            } else {
+                statusSpan.textContent = 'ยังไม่อ่าน';
+                statusSpan.classList.remove('completed');
+            }
+
+            document.getElementById('eventModal').style.display = 'flex';
+        }
+
+        // 3. Close Modal
+        function closeModal(event) {
+            if (event.target.id === 'eventModal') {
+                document.getElementById('eventModal').style.display = 'none';
+            }
+        }
+
+        // --- Flash Message Auto-Hide Logic ---
+    document.addEventListener('DOMContentLoaded', function() {
+        const flashContainer = document.getElementById('flash-messages');
+        if (flashContainer) {
+            // 1. ตั้งเวลา 3 วินาที ให้หายไปเอง
+            setTimeout(function() {
+                hideFlashMessages();
+            }, 5000);
+
+            // 2. ดักจับการคลิกที่ "พื้นที่ว่าง" (Document)
+            document.addEventListener('click', function(event) {
+                // ถ้าคลิกไม่ได้โดนตัวกล่องข้อความ -> ให้ซ่อนทันที
+                if (!flashContainer.contains(event.target)) {
+                    hideFlashMessages();
+                }
+            });
+        }
+
+        function hideFlashMessages() {
+            if (flashContainer) {
+                // ใส่ Animation ให้ค่อยๆ จางหาย
+                flashContainer.style.transition = "opacity 0.5s ease, transform 0.5s ease";
+                flashContainer.style.opacity = '0';
+                flashContainer.style.transform = 'translate(-50%, -20px)'; // ลอยขึ้นนิดนึงตอนหาย
+                
+                // ลบออกจาก DOM หลังจาก Animation จบ
+                setTimeout(() => {
+                    if(flashContainer.parentNode) {
+                        flashContainer.parentNode.removeChild(flashContainer);
+                    }
+                }, 500);
+            }
+        }
+    });
+    </script>
+
+
+{% endblock %}

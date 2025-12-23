@@ -1,0 +1,210 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}เฉลยคำตอบ{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { 
+        font-family: kanit, sans-serif;
+        background-color: #F0F2F5; 
+    }
+    .container { 
+        max-width: 800px; 
+        margin: 40px auto; 
+        padding: 0 15px; 
+    }
+    .header { 
+        margin-bottom: 20px; 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+    }
+    .header h2 { 
+        margin: 0; 
+        color: #000000; 
+    }
+    .navbar { 
+        background: var(--card-bg); 
+        padding: 1rem 2rem; 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+        position: sticky; 
+        top: 0; 
+        z-index: 100; 
+    }
+    .logo-icon { 
+        height: 40px; 
+    }
+    .nav-left { 
+        display: flex; 
+        align-items: center; 
+        gap: 10px; 
+        font-weight: 600; 
+        color: var(--primary); 
+        font-size: 1.2rem; 
+    }
+    .profile-container { 
+        position: relative; 
+        cursor: pointer; 
+        display: flex; 
+        align-items: center; 
+    }
+    .profile-popup { 
+        display: none; 
+        position: absolute; 
+        top: 60px; 
+        right: 0; 
+        width: 250px; 
+        background-color: #fff; 
+        border-radius: 8px; 
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+        z-index: 1000; padding: 1rem; 
+    }
+    .profile-popup-header { 
+        text-align: center; 
+        padding-bottom: 1rem; 
+        border-bottom: 1px solid #eee; 
+    }
+    .profile-img { 
+        width: 40px; 
+        height: 40px; 
+        background: #E0E0E0; 
+        border-radius: 50%; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        font-weight: bold; 
+        color: #555; 
+        margin-right: 10px; 
+    }
+    .q-card {
+        background: #fff; padding: 20px; border-radius: 12px;
+        margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        /* border-left: 5px solid #ddd; */
+    }
+    .q-card.correct { 
+        border-left-color: #2ECC71; 
+    }
+    /* .q-card.wrong { 
+        border-left-color: #FF6B6B; 
+    } */
+    .q-text { 
+        font-weight: 600; 
+        font-size: 1.1rem; 
+        margin-bottom: 15px; 
+    }
+    .option {
+        padding: 10px 15px; 
+        border-radius: 8px; 
+        margin-bottom: 5px;
+        background: #F8F9FA; 
+        border: 1px solid transparent;
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center;
+    }
+    
+    /* Highlight Styles */
+    .option.is-correct { 
+        background: #D4EDDA; 
+        border-color: #C3E6CB; 
+        color: #155724; 
+        font-weight: 600; 
+    }
+    .option.is-wrong-selected { 
+        background: #F8D7DA; 
+        border-color: #F5C6CB; color: #721C24; 
+    }
+    
+    .badge { 
+        padding: 2px 8px; 
+        border-radius: 4px; 
+        font-size: 0.75rem; 
+    }
+    .badge-user { 
+        background: #666; 
+        color: white; 
+    }
+    .btn {
+        padding: 10px 20px; 
+        border-radius: 8px; 
+        text-decoration: none; 
+        color: #333; 
+        font-weight: 600; 
+    }
+        
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<nav class="navbar">
+    <div class="nav-left">
+        <img class="logo-icon" src="{% static 'images/logo.png' %}" alt="Logo">
+        <span>Smart Study Planner</span>
+    </div>
+    <div class="profile-container" onclick="togglePopup()">
+        <div class="profile-img">{{ user.username|make_list|first|upper }}</div>
+        <span style="font-weight: bold;">{{ user.username }}</span>
+        <div id="profile-popup" class="profile-popup">
+            <div class="profile-popup-header">
+                <div class="profile-img">
+                    {{ user.username|make_list|first|upper }}
+                </div>
+                <h4>{{ user.first_name }} {{ user.last_name }}</h4>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="header">
+        <div>
+            <h2>เฉลย</h2>
+            <small style="color: #666;">วิชา: {{ result.session.subject.name }}</small>
+        </div>
+        <div style="font-size: 1.5rem; font-weight: bold; color: {% if result.score >= 3 %}#2ECC71{% else %}#db192c{% endif %};">
+            {{ result.score }}/{{ result.total_questions }}
+        </div>
+    </div>
+
+    {% for item in solution_data %}
+    <div class="q-card {% if item.is_correct %}correct{% else %}wrong{% endif %}">
+        <div class="q-text">
+            {{ forloop.counter }}. {{ item.question }}
+            {% if item.is_correct %}
+                <i class="fas fa-check-circle" style="color: #2ECC71; margin-left: 5px;"></i>
+            {% else %}
+                <i class="fas fa-times-circle" style="color: #FF6B6B; margin-left: 5px;"></i>
+            {% endif %}
+        </div>
+
+        {% for opt in item.options %}
+            <div class="option 
+                {% if forloop.counter0 == item.correct_index %}is-correct{% endif %}
+                {% if forloop.counter0 == item.user_index and forloop.counter0 != item.correct_index %}is-wrong-selected{% endif %}">
+                
+                <span>{{ opt }}</span>
+                
+                <div>
+                    {% if forloop.counter0 == item.user_index %}
+                        <span class="badge badge-user">คุณตอบ</span>
+                    {% endif %}
+
+                    {% if forloop.counter0 == item.correct_index %}
+                        <i class="fas fa-check" style="color: #155724;"></i>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+
+    <div style="margin-top: 30px; text-align: center;">
+        <a href="{% url 'quiz_result' result.result_id %}" class="btn" style="background:#ddd; padding:10px 30px; border-radius:8px; text-decoration:none; color:#333;">ย้อนกลับ</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,571 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}กำหนดเวลาว่าง - Smart Planner{% endblock %}
+
+{% block extra_css %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&display=swap');
+    :root {
+        --primary: #336BF9;
+        --primary-dark: #2554D1;
+        --secondary: #6C757D;
+        --success: #2ECC71;
+        --bg-color: #EDF0F9;
+        --card-bg: #FFFFFF;
+        --text-dark: #2C3E50;
+        --text-grey: #666666;
+        --text-light-grey: #888888;
+        --danger: #FF6B6B;
+        --danger-bg: #FFF5F5;
+        --border-color: #E0E0E0;
+    }
+    body {
+        background-color: #f0f2f5; 
+        font-family: 'Kanit', sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    .navbar {
+        display: flex;
+        align-items: center;
+        padding: 1.25rem 2rem;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 0;
+    }
+    .navbar-brand { 
+        display: flex;
+        align-items: center;
+        font-weight: 600; 
+        font-size: 1.1rem; 
+        color: var(--primary); 
+        text-decoration: none;
+        gap: 0.5rem;
+    }
+    .container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+    .progress-indicator {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 2rem;
+        gap: 2rem;
+    }
+    .progress-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        color: #aaa;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+    .progress-step.finished {
+        color: #28a745;
+        font-weight: 600;
+    }
+    .progress-step.finished .dot {
+        background-color: #28a745;
+        color: white;
+    }
+    .progress-step.active {
+        color: #007bff;
+        font-weight: 600;
+    }
+    .progress-step .dot {
+        width: 32px;
+        height: 32px;
+        background-color: #ddd;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+        font-size: 0.85rem;
+        transition: all 0.3s ease;
+    }
+    .progress-step.active .dot {
+        background-color: #007bff;
+        color: white;
+    }
+    .progress-line {
+        width: 60px;
+        height: 3px;
+        background-color: #28a745;
+        margin: 0 1rem;
+    }
+    .progress-line-sec {
+        width: 60px;
+        height: 3px;
+        background-color: #ddd;
+        margin: 0 1rem;
+    }
+    .progress-line.active {
+        background-color: #28a745;
+    }
+    .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    .page-title { 
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2c3e50; 
+        margin: 0.5rem 0 0.5rem 0;
+    }
+    .page-subtitle {
+        font-size: 1rem;
+        color: #6c757d;
+        margin: 0;
+    }
+    .schedule-card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        padding: 2rem;
+        max-width: 900px;
+        height: 600px;
+        
+    }
+    .schedule-card h2 {
+        font-size: 1.3rem; 
+        font-weight: 600;
+        margin-bottom: 1.5rem; 
+        color: #2c3e50;
+    }
+    .schedule-card .subtitle {
+        font-size: 1.1rem;
+        color: #666;
+        margin: 1rem 0 3rem 0;
+        line-height: 1.5;
+    }
+    .alert {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        border: 1px solid #f5c6cb;
+    }
+    .main-grid {
+        display: flex;
+        gap: 1.5rem;
+        align-items: flex-start;
+        text-align: left;
+    }
+    .legend {
+        flex-shrink: 0;
+        min-width: 180px;
+    }
+    .legend h3 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: #2c3e50;
+    }
+    .legend-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 1.2rem;
+        padding: 0.5rem;
+        border-radius: 8px;
+        transition: background-color 0.2s ease;
+    }
+    .legend-item:hover {
+        background-color: #f8f9fa;
+    }
+    .legend-color {
+        width: 24px;
+        height: 24px;
+        border-radius: 6px;
+        margin-right: 1rem;
+        flex-shrink: 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .legend-text {
+        font-weight: 500;
+        color: #2c3e50;
+    }
+    .legend-time {
+        font-size: 0.85rem;
+        color: #666;
+        margin-top: 2rem;
+    }
+    .schedule-grid {
+        flex-grow: 1;
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 20px;
+        max-width: 100%;
+        height: 500px;
+    }
+    .day-header {
+        font-weight: 600;
+        font-size: 1rem;
+        text-align: center;
+        padding: 0.5rem;
+        color: #2c3e50;
+        border-bottom: 2px solid #e9ecef;
+        margin-bottom: 0.5rem;
+    }
+    .time-slot {
+        height: 55px;
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        cursor: pointer;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        background-color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .time-slot:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        border-color: #ced4da;
+    }
+
+    .time-slot input[type="checkbox"] {
+        display: none;
+    }
+    .time-slot.morning.selected {
+        background: linear-gradient(135deg, #ff9800, #f57c00);
+        border-color: #f57c00;
+        color: white;
+        box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+    }
+    .time-slot.afternoon.selected {
+        background: linear-gradient(135deg, #f44336, #d32f2f);
+        border-color: #d32f2f;
+        color: white;
+        box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+    }
+    .time-slot.evening.selected {
+        background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+        border-color: #7b1fa2;
+        color: white;
+        box-shadow: 0 4px 15px rgba(156, 39, 176, 0.3);
+    }
+    .time-slot.night.selected {
+        background: linear-gradient(135deg, #2196f3, #1976d2);
+        border-color: #1976d2;
+        color: white;
+        box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+    }
+    .time-slot.selected {
+        transform: translateY(-1px);
+    }
+
+    .time-slot.selected:hover {
+        transform: translateY(-3px);
+    }
+    .nav-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin: 2rem;
+        gap: 1rem;
+    }
+    .btn {
+        padding: 0.875rem 2rem; 
+        border: none; 
+        border-radius: 25px; 
+        cursor: pointer; 
+        font-weight: 600; 
+        text-decoration: none; 
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    .btn-back {
+        background-color: #e0e0e0; 
+        color: #333;
+        border-radius: 10px;
+    }
+    .btn-back:hover {
+        background-color: #545b62;
+        transform: translateY(-1px);
+    }
+    .btn-next {
+        background-color: #007bff; ;
+        color: white;
+        border-radius: 10px;
+        width: 120px;
+    }
+    .btn-next:hover {
+        background-color: #0056b3;
+        transform: translateY(-1px);
+    }
+    .btn:disabled {
+        background-color: #e9ecef;
+        color: #6c757d;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+    @media (max-width: 768px) {
+        .container {
+            margin: 1rem auto;
+            padding: 0 0.5rem;
+        }
+        .schedule-card {
+            padding: 2rem;
+        }
+        .main-grid {
+            flex-direction: column;
+            gap: 2rem;
+        }
+        .legend {
+            min-width: auto;
+        }
+        .schedule-grid {
+            gap: 6px;
+        }
+        .time-slot {
+            height: 45px;
+        }
+        .nav-buttons {
+            flex-direction: column;
+        }
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+        .schedule-card h1 {
+            font-size: 1.8rem;
+        }
+        .progress-indicator {
+            gap: 1rem;
+        }
+    }
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    .schedule-card {
+        animation: fadeIn 0.6s ease-out;
+    }
+    .time-slot {
+        animation: fadeIn 0.4s ease-out;
+        animation-fill-mode: both;
+        margin: 2px;
+        width: 100%; /* แก้ไขให้เต็มช่อง grid */
+        height: 70px;
+    }
+    /* Delay animation code ... (same as original) */
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="navbar">
+    <a href="{% url 'add_subject' %}" class="navbar-brand">
+        กำหนดเวลาว่าง
+    </a>
+</nav>
+<div class="container">
+    <div class="progress-indicator">
+        <div class="progress-step finished">
+            <div class="dot">1</div>
+            <span>เพิ่มวิชา</span>
+        </div>
+        <div class="progress-line"></div>
+        <div class="progress-step active">
+            <div class="dot">2</div>
+            <span>กำหนดเวลาว่าง</span>
+        </div>
+        <div class="progress-line-sec"></div>
+        <div class="progress-step">
+            <div class="dot">3</div>
+            <span>สร้างแผน</span>
+        </div>
+    </div>
+
+    <div class="page-header">
+        <h1 class="page-title">กำหนดเวลาว่าง</h1>
+        <p class="page-subtitle">บอกเราว่าคุณว่างเมื่อไหร่ แล้วเราจะช่วยสร้างแผนการเรียนที่ดีที่สุดให้</p>
+    </div>
+
+    <div class="schedule-card">
+        <h2>กำหนดเวลาว่าง</h2>
+        <!-- {% if messages %}
+            {% for message in messages %}
+                <div class="alert">{{ message }}</div>
+            {% endfor %}
+        {% endif %} -->
+
+        <form method="post" id="schedule-form">
+            {% csrf_token %}
+            
+            <div class="main-grid">
+                <div class="legend">
+                    <h3>ช่วงเวลา</h3>
+
+                    <div class="legend-item" data-slot="morning">
+                        <div class="legend-color" style="background: linear-gradient(135deg, #ff9800, #f57c00);"></div>
+                        <div>
+                            <div class="legend-text">เช้า</div>
+                            <div class="legend-time">(06:00-12:00)</div>
+                        </div>
+                    </div>
+
+                    <div class="legend-item" data-slot="afternoon">
+                        <div class="legend-color" style="background: linear-gradient(135deg, #f44336, #d32f2f);"></div>
+                        <div>
+                            <div class="legend-text">บ่าย</div>
+                            <div class="legend-time">(13:00-18:00)</div>
+                        </div>
+                    </div>
+
+                    <div class="legend-item" data-slot="evening">
+                        <div class="legend-color" style="background: linear-gradient(135deg, #9c27b0, #7b1fa2);"></div>
+                        <div>
+                            <div class="legend-text">เย็น</div>
+                            <div class="legend-time">(18:00-22:00)</div>
+                        </div>
+                    </div>
+
+                    <div class="legend-item" data-slot="night">
+                        <div class="legend-color" style="background: linear-gradient(135deg, #2196f3, #1976d2);"></div>
+                        <div>
+                            <div class="legend-text">กลางคืน</div>
+                            <div class="legend-time">(22:00-02:00)</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="schedule-grid">
+                    {% for day_num, day_name in days.items %}
+                        <div class="day-header">{{ day_name }}</div>
+                    {% endfor %}
+
+                    {% for slot in time_slots %}
+                        {% for day_num, day_name in days.items %}
+
+                            {% with day_str=day_num|stringformat:"s" %}
+                            {% with slot_id=day_str|add:"_"|add:slot.id %}
+
+                            <label class="time-slot {{ slot.class }} {% if slot_id in user_selections %}selected{% endif %}"
+                                   title="{{ day_name }} - {{ slot.label }}">
+
+                                <input type="checkbox" 
+                                       name="slot_{{ day_num }}_{{ slot.id }}" 
+                                       {% if slot_id in user_selections %}checked{% endif %}>
+                            </label>
+                        
+                            {% endwith %}
+                            {% endwith %}
+                        
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            </div>
+
+        </form>
+    </div>
+    <div class="nav-buttons">
+        <a href="{% url 'add_subject' %}" class="btn btn-back">ย้อนกลับ</a>
+        <button type="submit" form="schedule-form" class="btn btn-next">ถัดไป</button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('schedule-form');
+        const nextBtn = document.querySelector('.btn-next');
+        const scheduleGrid = document.querySelector('.schedule-grid');
+
+        let isMouseDown = false;
+        let dragAction = null;
+
+        function updateSlotState(slot, shouldBeSelected) {
+            const checkbox = slot.querySelector('input[type="checkbox"]');
+            if (shouldBeSelected) {
+                slot.classList.add('selected');
+            } else {
+                slot.classList.remove('selected');
+            }
+            if (checkbox) checkbox.checked = shouldBeSelected;
+        }
+
+        function updateNextButtonState() {
+            const checkedSlots = form.querySelectorAll('input[type="checkbox"]:checked');
+            // Uncomment บรรทัดล่างถ้าต้องการบังคับให้เลือกอย่างน้อย 1 ช่อง
+            // nextBtn.disabled = checkedSlots.length === 0;
+        }
+
+        function initializeLegendClick() {
+            document.querySelectorAll('.legend-item').forEach(item => {
+                item.style.cursor = 'pointer';
+                item.addEventListener('click', function() {
+                    const slotType = this.dataset.slot;
+                    const targetSlots = document.querySelectorAll(`.time-slot.${slotType}`);
+                    
+                    // เช็คว่าในแถวนั้นถูกเลือกครบหรือยัง
+                    const allSelected = Array.from(targetSlots).every(slot => slot.classList.contains('selected'));
+                    const shouldSelect = !allSelected; // ถ้าครบแล้วให้ยกเลิก, ถ้ายังให้เลือกทั้งหมด
+
+                    targetSlots.forEach(slot => updateSlotState(slot, shouldSelect));
+                    updateNextButtonState();
+                });
+            });
+        }
+
+        function initializeScheduleGrid() {
+            scheduleGrid.addEventListener('selectstart', e => e.preventDefault());
+
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                slot.setAttribute('tabindex', '0');
+                slot.addEventListener('mousedown', function(e) {
+                    e.preventDefault();
+                    isMouseDown = true;
+                    const isCurrentlySelected = this.classList.contains('selected');
+                    dragAction = isCurrentlySelected ? 'deselect' : 'select';
+
+                    updateSlotState(this, !isCurrentlySelected);
+                });
+
+                slot.addEventListener('mouseover', function() {
+                    if (isMouseDown) { 
+                        const shouldSelect = (dragAction === 'select');
+                        updateSlotState(this, shouldSelect);
+                    }
+                });
+
+                slot.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        updateSlotState(this, !this.classList.contains('selected'));
+                        updateNextButtonState();
+                    }
+                });
+            });
+
+            window.addEventListener('mouseup', function() {
+                if (isMouseDown) {
+                    isMouseDown = false;
+                    dragAction = null;
+                    updateNextButtonState();
+                }
+            });
+        }
+
+        initializeScheduleGrid();
+        initializeLegendClick();
+        form.addEventListener('change', updateNextButtonState);
+        updateNextButtonState();
+    });
+</script>
+{% endblock %}

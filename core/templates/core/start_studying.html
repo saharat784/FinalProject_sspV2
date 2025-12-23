@@ -1,0 +1,493 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}เริ่มเรียน: {{ session.subject.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Global Styles */
+    body {
+        font-family: kanit, sans-serif;
+        background-color: #F0F2F5;
+    }
+    .navbar { 
+        background: var(--card-bg); 
+        padding: 1rem 2rem; 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+        position: sticky; 
+        top: 0; 
+        z-index: 100; 
+    }
+    .logo-icon { 
+        height: 40px; 
+    }
+    .nav-left { 
+        display: flex; 
+        align-items: center; 
+        gap: 10px; 
+        font-weight: 600; 
+        color: var(--primary); 
+        font-size: 1.2rem; 
+    }
+    .profile-container { 
+        position: relative; 
+        cursor: pointer; 
+        display: flex; 
+        align-items: center; 
+    }
+    /* .profile-container:hover{
+        text-decoration: underline;
+        color: var(--primary);
+    } */
+    .profile-popup { 
+        display: none; 
+        position: absolute; 
+        top: 60px; 
+        right: 0; 
+        width: 250px; 
+        background-color: #fff; 
+        border-radius: 8px; 
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+        z-index: 1000; padding: 1rem; 
+    }
+    .profile-popup-header { 
+        text-align: center; 
+        padding-bottom: 1rem; 
+        border-bottom: 1px solid #eee; 
+    }
+    .profile-img { 
+        width: 40px; 
+        height: 40px; 
+        background: #E0E0E0; 
+        border-radius: 50%; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        font-weight: bold; 
+        color: #555; 
+        margin-right: 10px; 
+    }
+    /* .popup-menu { 
+        list-style: none; 
+        padding: 0; 
+        margin-top: 1rem; 
+    }
+    .popup-menu li { 
+        padding: 0.75rem 0; 
+        border-bottom: 1px solid #eee; 
+    }
+    .popup-menu li a, .popup-menu li button { 
+        text-decoration: none; color: #333; 
+        background: none; 
+        border: none; 
+        width: 100%; 
+        text-align: left; 
+        cursor: pointer; 
+        font-size: 1rem; 
+    }
+    .btn-logout { 
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 0.9rem;
+        font-weight: 600;
+        padding: 0;
+        width: 100% 
+    }
+    .btn-logout:hover {
+        text-decoration: underline;
+        color: var(--danger); 
+    } */
+    
+    /* Main Layout */
+    .study-container {
+        max-width: 1000px;
+        margin: 40px auto;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 600px;
+    }
+
+    .study-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    .study-header h1 {
+        font-size: 2rem;
+        color: #2C3E50;
+        margin: 0;
+        font-weight: 700;
+    }
+    
+    /* Grid Layout: Left (Info) & Right (Timer) */
+    .study-grid {
+        display: grid;
+        grid-template-columns: 1fr 1px 1.2fr; /* Col 1, Divider, Col 2 */
+        gap: 40px;
+        width: 100%;
+        align-items: center;
+    }
+    
+    /* Vertical Divider */
+    .divider {
+        background-color: #E0E0E0;
+        width: 1px;
+        height: 100%;
+        min-height: 300px;
+    }
+
+    /* Left Column: Info Cards */
+    .info-column {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .info-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .info-group label {
+        display: block;
+        font-size: 0.85rem;
+        color: #666;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+    
+    .info-box {
+        border: 1px solid #E0E0E0;
+        border-radius: 12px;
+        padding: 12px 15px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2C3E50;
+        background: #fff;
+        text-align: center;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Right Column: Timer */
+    .timer-column {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+    }
+
+    /* Circular Timer CSS */
+    .timer-wrapper {
+        position: relative;
+        width: 320px;
+        height: 320px;
+    }
+    
+    .timer-svg {
+        width: 100%;
+        height: 100%;
+        transform: rotate(-90deg); /* Start from top */
+    }
+    
+    .timer-circle-bg {
+        fill: none;
+        stroke: #F0F2F5;
+        stroke-width: 15;
+    }
+    
+    .timer-circle-progress {
+        fill: none;
+        stroke: #007bff; /* สีม่วงตามภาพ */
+        stroke-width: 15;
+        stroke-linecap: round;
+        stroke-dasharray: 880; /* 2 * PI * R (approx for r=140) */
+        stroke-dashoffset: 0;
+        transition: stroke-dashoffset 1s linear;
+    }
+    
+    .timer-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 3rem;
+        font-weight: 700;
+        color: #000; /* สีน้ำเงินม่วงตามภาพ */
+        font-variant-numeric: tabular-nums; /* ป้องกันตัวเลขขยับไปมา */
+    }
+
+    /* Buttons Section */
+    .action-buttons {
+        margin-top: 50px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .btn-action {
+        padding: 15px;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: all 0.3s ease;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 10px;
+    }
+
+    .btn-start {
+        background-color: #007bff;
+        color: white;
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        border-radius: 10px;
+    }
+    
+    .btn-start:hover {
+        background-color: #0056b3;
+        transform: translateY(-2px);
+    }
+
+    .btn-start.running {
+        background-color: #ffc107; 
+        color: #333;
+    }
+
+    .btn-back {
+        background-color: white;
+        color: #333;
+        border: 2px solid #E0E0E0;
+        border-radius: 10px;
+    }
+    
+    .btn-back:hover {
+        background-color: #f8f9fa;
+        border-color: #ccc;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .study-grid {
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+        .divider {
+            width: 100%;
+            height: 1px;
+            min-height: 1px;
+        }
+        .timer-wrapper {
+            width: 250px;
+            height: 250px;
+        }
+        .timer-text {
+            font-size: 2.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="navbar">
+    <!-- Logo Section -->
+    <div class="nav-left">
+        <img class="logo-icon" src="{% static 'images/logo.png' %}" alt="Logo">
+        <span>Smart Study Planner</span>
+    </div>
+    <!-- Profile Section -->
+    <div class="profile-container" onclick="togglePopup()">
+        <div class="profile-img">{{ user.username|make_list|first|upper }}</div>
+        <span style="font-weight: bold;">{{ user.username }}</span>
+        <div id="profile-popup" class="profile-popup">
+            <div class="profile-popup-header">
+                <div class="profile-img">
+                    {{ user.username|make_list|first|upper }}
+                </div>
+                <h4>{{ user.first_name }} {{ user.last_name }}</h4>
+            </div>
+            <!-- <ul class="popup-menu">
+                <li><a href="#">แก้ไขโปรไฟล์</a></li>
+                <li><a href="#">ความคืบหน้า</a></li>
+                <li><a href="#">สร้างแผนใหม่</a></li>
+                <li><a href="#">การแจ้งเตือน</a></li>
+                <li>
+                    <form action="{% url 'logout' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-logout">ออกจากระบบ</button>
+                    </form>
+                </li>
+            </ul> -->
+        </div>
+    </div>
+</nav>
+
+<div class="study-container">
+    <div class="study-header">
+        <h1>{{ session.subject.name }}</h1>
+        <p style="color: #666; margin-top: 5px;">{{ session.topic|default:"ไม่มีหัวข้อระบุ" }}</p>
+    </div>
+
+    <div class="study-grid">
+        <div class="info-column">
+            
+            <div class="info-row">
+                <div class="info-group">
+                    <label>ระยะเวลาการเรียน</label>
+                    <div class="info-box">{{ duration_minutes }} นาที</div>
+                </div>
+                <div class="info-group">
+                    <label>เวลา</label>
+                    <div class="info-box">{{ session.start_time|date:"H:i" }} - {{ session.end_time|date:"H:i" }}</div>
+                </div>
+            </div>
+
+            <div class="info-row">
+                <div class="info-group">
+                    <label>ระยะเวลาพักผ่อน</label>
+                    <div class="info-box">
+                        {% if break_minutes > 0 %}{{ break_minutes }} นาที{% else %}ไม่พัก{% endif %}
+                    </div>
+                </div>
+                <div class="info-group">
+                    <label>ความคืบหน้า</label>
+                    <div class="info-box">{{ subject_progress }}%</div>
+                </div>
+            </div>
+
+            <div class="info-group">
+                <label>ระดับ</label>
+                <div class="info-box">
+                    {{ session.subject.get_difficulty_display }}
+                </div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="timer-column">
+            <div class="timer-wrapper">
+                <svg class="timer-svg" viewBox="0 0 300 300">
+                    <circle class="timer-circle-bg" cx="150" cy="150" r="140"></circle>
+                    <circle id="timer-ring" class="timer-circle-progress" cx="150" cy="150" r="140"></circle>
+                </svg>
+                <div class="timer-text" id="timer-display">00:00:00</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-buttons">
+        <button id="btn-toggle" class="btn-action btn-start" onclick="toggleTimer()">เริ่มเรียน</button>
+        <a href="{% url 'home_page' %}" class="btn-action btn-back">กลับ</a>
+        
+        <a href="{% url 'complete_session' session.session_id %}" id="btn-finish" class="btn-action" style="background-color: #2ECC71; color: white; display: none;">
+            เรียนจบแล้ว
+        </a>
+    </div>
+</div>
+
+<script>
+    // Configuration
+    const durationMinutes = {{ duration_minutes }};
+    let timeRemaining = durationMinutes * 60; // seconds
+    let totalTime = timeRemaining;
+    let isRunning = false;
+    let timerInterval = null;
+
+    // DOM Elements
+    const timerDisplay = document.getElementById('timer-display');
+    const timerRing = document.getElementById('timer-ring');
+    const btnToggle = document.getElementById('btn-toggle');
+    const btnFinish = document.getElementById('btn-finish');
+    
+    // Circle Props for Animation
+    const radius = 140;
+    const circumference = 2 * Math.PI * radius;
+    timerRing.style.strokeDasharray = `${circumference} ${circumference}`;
+    timerRing.style.strokeDashoffset = 0;
+
+    // Format Time HH:MM:SS
+    function formatTime(seconds) {
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = seconds % 60;
+        // แสดง HH:MM:SS หรือ MM:SS ถ้าชั่วโมงเป็น 0 ตามความเหมาะสม
+        // ตามภาพต้นแบบมี HH ดังนั้นแสดงครบเลย
+        return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+
+    // Set initial Display
+    timerDisplay.textContent = formatTime(timeRemaining);
+
+    function setProgress(percent) {
+        const offset = circumference - (percent / 100) * circumference;
+        timerRing.style.strokeDashoffset = offset;
+    }
+
+    function toggleTimer() {
+        if (isRunning) {
+            // Pause
+            pauseTimer();
+        } else {
+            // Start
+            startTimer();
+        }
+    }
+
+    function startTimer() {
+        isRunning = true;
+        btnToggle.textContent = "หยุดชั่วคราว";
+        btnToggle.classList.add('running');
+        
+        timerInterval = setInterval(() => {
+            if (timeRemaining > 0) {
+                timeRemaining--;
+                timerDisplay.textContent = formatTime(timeRemaining);
+                
+                // Update Circle
+                const percentRemaining = (timeRemaining / totalTime) * 100;
+                // Inverse for countdown visual (full to empty)
+                setProgress(percentRemaining);
+            } else {
+                finishTimer();
+            }
+        }, 1000);
+    }
+
+    function pauseTimer() {
+        isRunning = false;
+        btnToggle.textContent = "เรียนต่อ";
+        btnToggle.classList.remove('running');
+        clearInterval(timerInterval);
+    }
+
+    function finishTimer() {
+        clearInterval(timerInterval);
+        isRunning = false;
+        timerDisplay.textContent = "00:00:00";
+        timerRing.style.strokeDashoffset = circumference; // Empty circle
+        
+        // UI Updates for Finish
+        btnToggle.style.display = 'none'; // Hide Start/Pause
+        btnFinish.style.display = 'block'; // Show Finish button
+        
+        // Play notification sound (optional)
+        // const audio = new Audio('/static/sounds/bell.mp3');
+        // audio.play();
+        alert("หมดเวลาเรียนแล้ว! อย่าลืมพักผ่อนนะ");
+    }
+</script>
+{% endblock %}
