@@ -1,0 +1,66 @@
+body {
+    font-family: 'Kanit', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #EDF0F9;
+    color: #333;
+}
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.logo-icon {
+    height: 40px;
+}
+.navbar-logo {
+    display: flex;
+    align-items: center;
+    color: var(--primary);
+}
+.navbar-logo img {
+    height: 40px;
+    margin-right: 10px;
+}
+.navbar-links a {
+    text-decoration: none;
+    color: #333;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+.navbar-links a.btn {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+}
+.navbar-links a:hover {
+    background-color: #eee;
+}
+.navbar-links a.btn:hover {
+    background-color: #9951FF;
+}
+.hero-section {
+    text-align: center;
+    padding: 10rem 2rem;
+}
+.hero-section h1 {
+    font-size: 3rem;
+    margin-bottom: 5rem;
+}
+.hero-section .btn-primary {
+    text-decoration: none;
+    background-color: #007bff;
+    color: #fff;
+    padding: 0.75rem 2rem;
+    border-radius: 10px;
+    font-size: 1.25rem;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+.hero-section .btn-primary:hover {
+    background-color: #9951FF;
+}

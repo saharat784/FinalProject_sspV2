@@ -1,0 +1,141 @@
+body { 
+    font-family: kanit, sans-serif;
+    background-color: #F0F2F5; 
+}
+.container { 
+    max-width: 800px; 
+    margin: 40px auto; 
+    padding: 0 15px; 
+}
+.header { 
+    margin-bottom: 20px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+}
+.header h2 { 
+    margin: 0; 
+    color: #000000; 
+}
+.navbar { 
+    background: var(--card-bg); 
+    padding: 1rem 2rem; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+    position: sticky; 
+    top: 0; 
+    z-index: 100; 
+}
+.logo-icon { 
+    height: 40px; 
+}
+.nav-left { 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    font-weight: 600; 
+    color: var(--primary); 
+    font-size: 1.2rem; 
+}
+.profile-container { 
+    position: relative; 
+    cursor: pointer; 
+    display: flex; 
+    align-items: center; 
+}
+.profile-popup { 
+    display: none; 
+    position: absolute; 
+    top: 60px; 
+    right: 0; 
+    width: 250px; 
+    background-color: #fff; 
+    border-radius: 8px; 
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+    z-index: 1000; padding: 1rem; 
+}
+.profile-popup-header { 
+    text-align: center; 
+    padding-bottom: 1rem; 
+    border-bottom: 1px solid #eee; 
+}
+.profile-img { 
+    width: 40px; 
+    height: 40px; 
+    min-width: 40px;
+    min-height: 40px;
+    background: #E0E0E0; 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-weight: bold; 
+    color: #555; 
+    margin-right: 5px; 
+    overflow: hidden;
+}
+.profile-img-nav {
+   width: 100%;            /* ให้เต็มความกว้างของ container */
+    height: 100%;           /* ให้เต็มความสูงของ container */
+    border-radius: 50%;     /* ทำเป็นวงกลม */
+    object-fit: cover; 
+    display: block;
+}
+.q-card {
+    background: #fff; padding: 20px; border-radius: 12px;
+    margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    /* border-left: 5px solid #ddd; */
+}
+.q-card.correct { 
+    border-left-color: #2ECC71; 
+}
+/* .q-card.wrong { 
+    border-left-color: #FF6B6B; 
+} */
+.q-text { 
+    font-weight: 600; 
+    font-size: 1.1rem; 
+    margin-bottom: 15px; 
+}
+.option {
+    padding: 10px 15px; 
+    border-radius: 8px; 
+    margin-bottom: 5px;
+    background: #F8F9FA; 
+    border: 1px solid transparent;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+}
+
+/* Highlight Styles */
+.option.is-correct { 
+    background: #D4EDDA; 
+    border-color: #C3E6CB; 
+    color: #155724; 
+    font-weight: 600; 
+}
+.option.is-wrong-selected { 
+    background: #F8D7DA; 
+    border-color: #F5C6CB; color: #721C24; 
+}
+
+.badge { 
+    padding: 2px 8px; 
+    border-radius: 4px; 
+    font-size: 0.75rem; 
+}
+.badge-user { 
+    background: #666; 
+    color: white; 
+}
+.btn {
+    padding: 10px 20px; 
+    border-radius: 8px; 
+    text-decoration: none; 
+    color: #333; 
+    font-weight: 600; 
+}
+    

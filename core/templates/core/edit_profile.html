@@ -1,0 +1,241 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}แก้ไขโปรไฟล์ - Smart Study Planner{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" type="text/css" href="{% static 'core/edit_profile.css' %}">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+{% endblock %}
+
+{% block content %}
+<nav class="navbar">
+        <!-- Back Button -->
+        <div class="btn-back">
+            <a href="{% url 'home_page' %}">
+                <i class="fas fa-arrow-left"></i> กลับหน้าหลัก
+            </a>
+        </div>
+
+        <!-- Logo Section -->
+        <div class="nav-left">
+            <img class="logo-icon" src="{% static 'images/logo.png' %}" alt="Logo">
+            <span>Smart Study Planner</span>
+        </div>
+
+        <!-- Profile Section -->
+        <div class="profile-container" onclick="togglePopup()">
+            <div class="profile-img">
+                {% if user.profile_picture %}
+                    <img src="{{ user.profile_picture.url }}" class="profile-img-nav" alt="User Profile">
+                {% else %}
+                    <div class="profile-img-inner">
+                        {{ user.username|make_list|first|upper }}
+                    </div>
+                {% endif %}
+            </div>
+            <span style="font-weight: bold;">{{ user.username }}</span>
+            <div id="profile-popup" class="profile-popup">
+                <div class="profile-popup-header">
+                    <div class="profile-img">
+                        {% if user.profile_picture %}
+                            <img src="{{ user.profile_picture.url }}" class="profile-img-popup" alt="User Profile">
+                        {% else %}
+                            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                                {{ user.username|make_list|first|upper }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <h4>{{ user.first_name }} {{ user.last_name }}</h4>
+                    <p>{{ user.email }}</p>
+                </div>
+                <ul class="popup-menu">
+                    <li><a href="{% url 'edit_profile' %}">แก้ไขโปรไฟล์</a></li>
+                    <li><a href="#">ความคืบหน้า</a></li>
+                    <li><a href="#">สร้างแผนใหม่</a></li>
+                    <li><a href="{% url 'summary_history' %}">สมุดบันทึกสรุป</a></li>
+                    <li><a href="#">การแจ้งเตือน</a></li>
+                    <li>
+                        <form action="{% url 'logout' %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-logout">ออกจากระบบ</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+<div class="container container-top">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success" style="text-align: center;">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+</div>
+
+<div class="container" style="max-width: 800px;">
+    
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="profile-header-card">
+            <div class="profile-pic-container">
+                <div class="profile-pic-wrapper">
+                    {% if user.profile_picture %}
+                        <img src="{{ user.profile_picture.url }}" id="profile-preview" class="current-profile-pic" alt="Profile">
+                    {% else %}
+                        <div id="profile-placeholder" class="profile-placeholder">
+                            {{ user.username|make_list|first|upper }}
+                        </div>
+                        <img src="" id="profile-preview" class="current-profile-pic" style="display: none;" alt="Profile">
+                    {% endif %}
+                    
+                    <div class="edit-overlay">
+                        <button type="button" class="btn-edit-pic" onclick="toggleUploadMenu()">
+                            <i class="fas fa-pencil-alt"></i> Edit
+                        </button>
+
+                        <div id="upload-menu" class="upload-menu-dropdown">
+                            <label for="{{ user_form.profile_picture.id_for_label }}" class="menu-item">
+                                <i class="fas fa-camera"></i> อัปโหลดรูปภาพ
+                            </label>
+                            {% if user.profile_picture %}
+                            <div class="menu-item text-danger" onclick="document.getElementById('delete-pic-checkbox').checked = true; document.getElementById('settings-form').submit();">
+                                <i class="fas fa-trash-alt"></i> ลบรูปภาพ
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+            <div style="display: none;">
+                {{ user_form.profile_picture }}
+                <input type="checkbox" name="profile_picture-clear" id="delete-pic-checkbox">
+            </div>
+        
+            <h2 style="margin-top: 15px;">{{ user.username }}</h2>
+            <p style="color: #888;">{{ user.email }}</p>
+        </div>
+
+        <div class="settings-section">
+            <h3 class="section-title"><i class="fas fa-user"></i> ข้อมูลส่วนตัว</h3>
+            <div class="form-grid">
+                <div>
+                    <label>ชื่อจริง</label>
+                    {{ user_form.first_name }}
+                </div>
+                <div>
+                    <label>นามสกุล</label>
+                    {{ user_form.last_name }}
+                </div>
+                <div class="full-width">
+                    <label>อีเมล (แก้ไขไม่ได้)</label>
+                    {{ user_form.email }}
+                </div>
+                <!-- <div class="full-width">
+                    <label>คติประจำใจ / Bio</label>
+                    {{ settings_form.bio }}
+                </div> -->
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h3 class="section-title"><i class="fas fa-graduation-cap"></i> การตั้งค่าการเรียน & เป้าหมาย</h3>
+            <div class="form-grid">
+                <div class="full-width">
+                    <label>เป้าหมายการเรียนสูงสุด (เช่น GPA 4.00)</label>
+                    {{ settings_form.academic_goal }}
+                </div>
+                <div>
+                    <label>เวลาเรียนต่อครั้ง (นาที)</label>
+                    {{ settings_form.session_duration }}
+                </div>
+                <div>
+                    <label>เวลาพัก (นาที)</label>
+                    {{ settings_form.break_duration }}
+                </div>
+                <div class="full-width" style="margin-top: 10px;">
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        {{ settings_form.notifications_enabled }}
+                        <span>เปิดรับการแจ้งเตือน</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 40px;">
+            <a href="{% url 'home_page' %}" class="btn">ยกเลิก</a>
+            <button type="submit" class="btn-save-profile">บันทึกการเปลี่ยนแปลง</button>
+        </div>
+
+    </form>
+</div>
+
+<script>
+    // 1. ฟังก์ชันเปิด/ปิดเมนู Upload
+    function toggleUploadMenu() {
+        const menu = document.getElementById('upload-menu');
+        if (menu.style.display === 'block') {
+            menu.style.display = 'none';
+        } else {
+            menu.style.display = 'block';
+        }
+    }
+
+    // ปิดเมนูเมื่อคลิกที่อื่น
+    document.addEventListener('click', function(event) {
+        const menu = document.getElementById('upload-menu');
+        const btn = document.querySelector('.btn-edit-pic');
+        if (menu && menu.style.display === 'block' && !menu.contains(event.target) && !btn.contains(event.target)) {
+            menu.style.display = 'none';
+        }
+    });
+
+    // 2. ฟังก์ชัน Preview รูปทันทีที่เลือกไฟล์
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.getElementById('{{ user_form.profile_picture.id_for_label }}');
+        const imgPreview = document.getElementById('profile-preview');
+        const placeholder = document.getElementById('profile-placeholder');
+        const uploadMenu = document.getElementById('upload-menu');
+
+        if (fileInput) {
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        // ซ่อน Placeholder
+                        if (placeholder) placeholder.style.display = 'none';
+                        
+                        // แสดงรูปและอัปเดต src
+                        imgPreview.style.display = 'block';
+                        imgPreview.src = e.target.result;
+                    }
+                    
+                    reader.readAsDataURL(file);
+                    
+                    // ปิดเมนูหลังจากเลือกไฟล์
+                    if(uploadMenu) uploadMenu.style.display = 'none';
+                }
+            });
+        }
+    });
+    // Profile Popup Logic (Original)
+        function togglePopup() {
+            const popup = document.getElementById('profile-popup');
+            popup.style.display = (popup.style.display === 'block') ? 'none' : 'block';
+        }
+        
+        document.addEventListener('click', function(event) {
+            const profileContainer = document.querySelector('.profile-container');
+            const popup = document.getElementById('profile-popup');
+            if (!profileContainer.contains(event.target) && popup.style.display === 'block') {
+                popup.style.display = 'none';
+            }
+        });
+</script>
+{% endblock %}

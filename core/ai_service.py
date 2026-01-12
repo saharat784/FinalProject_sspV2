@@ -6,6 +6,8 @@ from django.utils import timezone
 import json
 import re
 import datetime
+
+from core.google_calendar import delete_event_from_google
 from .models import Subject, UserAvailability, StudySession
 
 # ตั้งค่า API Key
@@ -122,7 +124,14 @@ def generate_study_schedule(user, user_settings):
         print(f"ได้รายการตารางเรียนมาทั้งหมด: {len(schedule_list)} รายการ")
 
         # 5. บันทึกลง Database
-        # ลบอันเก่าที่ยังไม่เสร็จทิ้งก่อน (เฉพาะอนาคต)
+        # --- ✅ ส่วนที่เพิ่มใหม่: ลบ Event เก่าใน Google Calendar ก่อน ---
+        old_sessions = StudySession.objects.filter(user=user, is_completed=False)
+        
+        for session in old_sessions:
+            # ถ้า Session นี้เคยซิงค์ไปแล้ว (มี ID) ให้ลบออกจาก Google ด้วย
+            if session.google_event_id:
+                delete_event_from_google(user, session.google_event_id)
+                
         StudySession.objects.filter(user=user, is_completed=False).delete()
 
         new_sessions = []

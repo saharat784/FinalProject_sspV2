@@ -1,0 +1,680 @@
+/* --- Root Variables & Body (คงเดิม) --- */
+:root {
+    --primary: #336BF9;
+    --primary-dark: #2554D1;
+    --secondary: #6C757D;
+    --success: #2ECC71;
+    --bg-color: #EDF0F9;
+    --card-bg: #FFFFFF;
+    --text-dark: #2C3E50;
+    --text-grey: #666666;
+    --text-light-grey: #888888;
+    --danger: #FF6B6B;
+    --danger-bg: #FFF5F5;
+    --border-color: #E0E0E0;
+}
+
+body {
+    font-family: 'Kanit', sans-serif;
+    background-color: var(--bg-color);
+    margin: 0;
+    padding-bottom: 30px;
+}
+/* --- Navbar & Profile CSS (คงเดิม) --- */
+.navbar { 
+    background: var(--card-bg); 
+    padding: 1rem 2rem; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+    position: sticky; 
+    top: 0; 
+    z-index: 100; 
+}
+.logo-icon { 
+    height: 40px; 
+}
+.nav-left { 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    font-weight: 600; 
+    color: var(--primary); 
+    font-size: 1.2rem; 
+}
+.profile-container { 
+    position: relative; 
+    cursor: pointer; 
+    display: flex; 
+    align-items: center; 
+}
+.profile-container:hover{
+    text-decoration: underline;
+    color: var(--primary);
+}
+.profile-popup { 
+    display: none; 
+    position: absolute; 
+    top: 60px; 
+    right: 0; 
+    width: 250px; 
+    background-color: #fff; 
+    border-radius: 8px; 
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+    z-index: 1000; padding: 1rem; 
+}
+.profile-popup-header {
+    display: flex;
+    flex-direction: column; /* เรียงลงแนวตั้ง */
+    align-items: center;    /* จัดกึ่งกลางแนวนอน */
+    justify-content: center;
+    text-align: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+.profile-popup-header .profile-img {
+    margin-right: 0 !important;  /* เอาขอบขวาออกเพื่อให้มันอยู่กลางเป๊ะ */
+    margin-bottom: 10px;         /* ดันชื่อลงไปข้างล่างนิดหน่อย */
+    width: 60px;
+    height: 60px;
+}
+.profile-popup-header h4 {
+    margin: 0;
+    color: #333333 !important; /* บังคับเป็นสีดำเสมอ */
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: default; /* เวลาเอาเมาส์ชี้ชื่อ ไม่ต้องขึ้นรูปมือ */
+}
+.profile-popup-header p {
+    margin: 5px 0 0 0;
+    color: var(--text-grey);
+    font-size: 0.9rem;
+    cursor: default; /* เวลาเอาเมาส์ชี้อีเมล ไม่ต้องขึ้นรูปมือ */
+}
+.profile-img { 
+    width: 40px; 
+    height: 40px; 
+    min-width: 40px;
+    min-height: 40px;
+    background: #E0E0E0; 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-weight: bold; 
+    color: #555; 
+    margin-right: 5px; 
+    overflow: hidden;
+}
+.profile-img-nav {
+   width: 100%;            /* ให้เต็มความกว้างของ container */
+    height: 100%;           /* ให้เต็มความสูงของ container */
+    border-radius: 50%;     /* ทำเป็นวงกลม */
+    object-fit: cover; 
+    display: block;
+}
+.profile-img-popup {
+    width: 100%;            /* ให้เต็มความกว้างของ container */
+    height: 100%;           /* ให้เต็มความสูงของ container */
+    border-radius: 50%;     /* ทำเป็นวงกลม */
+    object-fit: cover;      /* ตัดภาพให้พอดีกรอบ */
+}
+.popup-menu { 
+    list-style: none; 
+    padding: 0; 
+    margin-top: 1rem; 
+}
+.popup-menu li { 
+    padding: 0.75rem 0; 
+    border-bottom: 1px solid #eee; 
+}
+.popup-menu li a, .popup-menu li button { 
+    text-decoration: none; color: #333; 
+    background: none; 
+    border: none; 
+    width: 100%; 
+    text-align: left; 
+    cursor: pointer; 
+    font-size: 1rem; 
+}
+.popup-menu li a:hover, .popup-menu li a button:hover { 
+    color: var(--primary); 
+}
+.btn-logout { 
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0;
+    width: 100% 
+}
+.btn-logout:hover {
+    text-decoration: underline;
+    color: var(--danger); 
+}
+/* --- Container & Generic Box (คงเดิม) --- */
+.container { 
+    max-width: 1000px; /* ขยายความกว้างเพื่อให้ตารางแสดงผลสวย */ 
+    margin: 20px auto; 
+    padding: 0 15px; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 20px; 
+}
+.box { 
+    background: var(--card-bg); 
+    border-radius: 16px; 
+    padding: 20px; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
+}
+.box-title { 
+    font-size: 1.1rem; 
+    font-weight: 600; 
+    color: var(--text-dark); 
+    margin-bottom: 15px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    gap: 8px; 
+}
+/* --- Progress, Task, Stats, Exams CSS (คงเดิม - ย่อไว้เพื่อความกระชับ) --- */
+.progress-header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: flex-end; 
+    margin-bottom: 10px; 
+}
+.welcome-text { 
+    font-size: 1.3rem; 
+    font-weight: 600; 
+    color: black; 
+}
+.progress-percent-text { 
+    font-size: 1.2rem; 
+    font-weight: bold; 
+    color: var(--primary); 
+}
+.progress-container { 
+    background: #E9ECEF; 
+    border-radius: 20px; 
+    height: 12px; 
+    overflow: hidden; 
+    margin-bottom: 20px; 
+}
+.progress-bar { 
+    background: linear-gradient(90deg, #336BF9, #9951FF); 
+    height: 100%; 
+    border-radius: 20px; 
+    transition: width 0.5s ease; 
+}
+.btn-start { 
+    background: var(--primary); 
+    color: white; 
+    border: none; 
+    width: 50%; 
+    left: -45%; 
+    transform: translateX(45%); 
+    padding: 12px; 
+    border-radius: 12px; 
+    font-size: 1rem; 
+    font-weight: 500; 
+    cursor: pointer; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    gap: 8px; 
+    text-decoration: none; 
+}
+.btn-start-completed {
+    background: var(--success);
+    color: white; 
+    border: none; 
+    width: 50%; 
+    left: -50%; 
+    transform: translateX(50%); 
+    padding: 12px; 
+    border-radius: 12px; 
+    font-size: 1rem; 
+    font-weight: 500; 
+    cursor: pointer; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    gap: 8px; 
+    text-decoration: none;
+}
+.btn-start-in-modal {
+    margin-top: 20px;
+    background: var(--primary); 
+    color: white; 
+    border: none; 
+    width: 100%; 
+    padding: 6px; 
+    border-radius: 12px; 
+    font-size: 1rem; 
+    font-weight: 500; 
+    cursor: pointer; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    gap: 8px; 
+    text-decoration: none; 
+}
+.stats-grid { 
+    display: grid; 
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 15px; 
+    text-align: center; 
+}
+.stat-item h3 { 
+    font-size: 1.5rem; 
+    margin: 0; 
+    color: var(--primary); 
+}
+.exam-item { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 10px; 
+    background: #e5f1e6; 
+    border-radius: 10px; 
+    margin-bottom: 10px; 
+    /* border-left: 4px solid #12B92B;  */
+}
+.exam-days { 
+    color: white; 
+    padding: 4px 10px; 
+    border-radius: 20px; 
+    font-size: 1rem;
+    font-style: bold; 
+    color: #000; 
+    margin-bottom: 5px; }
+.topic-text {
+    font-size: 0.75rem;
+    color: var(--text-grey);
+    margin-top: 4px;
+}
+.empty-state {
+    text-align: center;
+    color: #999;
+    padding: 20px;
+}
+
+/* --- Task/Plan List --- */
+.task-scroll-area {
+    max-height: 350px; /* ความสูงสำหรับโชว์ประมาณ 5 รายการ */
+    overflow-y: auto;  /* สั่งให้มี Scrollbar แนวตั้งถ้าเนื้อหายาวเกิน */
+    padding-right: 5px; /* เว้นที่ทางขวานิดหน่อยไม่ให้ Scrollbar ทับเนื้อหา */
+}
+/* ปรับแต่ง Scrollbar ให้สวยงาม (Optional) */
+.task-scroll-area::-webkit-scrollbar {
+    width: 6px;
+}
+.task-scroll-area::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+.task-scroll-area::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}
+.task-scroll-area::-webkit-scrollbar-thumb:hover {
+    background: #bbb;
+}
+.task-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #F0F0F0;
+}
+.task-row:last-child {
+    border-bottom: none;
+}
+.task-info {
+    flex-grow: 1;
+}
+.task-time {
+    font-size: 0.85rem;
+    color: var(--text-light-grey);
+    background: #F0F2F5;
+    padding: 2px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 4px;
+}
+.task-subject {
+    font-weight: 500;
+}
+.task-topic {
+    color: var(--text-light-grey);
+    font-size: 0.85rem;
+}
+.check-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid #DDD;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    color: transparent;
+    text-decoration: none;
+}
+.check-circle.completed {
+    background: var(--success);
+    border-color: var(--success);
+    color: white;
+}
+.btn-add-floating { 
+    bottom: 20px;
+    left: 50%;
+    margin-top: 10px;
+    background: linear-gradient(135deg, #336BF9, #9951FF);
+    color: white;
+    padding: 15px 25px;
+    border-radius: 20px;
+    font-weight: 600;
+    box-shadow: 0 4px 20px rgba(51, 107, 249, 0.4);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    z-index: 99;
+    transition: transform 0.2s;
+} 
+.btn-add-floating:hover { 
+    transform: translateY(-3px); 
+    box-shadow: 0 6px 25px rgba(51, 107, 249, 0.5); 
+}
+
+/* CALENDAR STYLES */
+.calendar-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.calendar-controls input[type="date"] {
+    padding: 5px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-family: 'Kanit', sans-serif;
+    color: var(--text-dark);
+}
+.calendar-wrapper {
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+}
+.calendar-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px; /* บังคับความกว้างขั้นต่ำเพื่อให้ scroll */
+}
+.calendar-table th, .calendar-table td {
+    border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 8px;
+    text-align: center;
+    vertical-align: top;
+}
+.calendar-table th {
+    background-color: #F8F9FA;
+    color: var(--text-grey);
+    font-weight: 500;
+    font-size: 0.9rem;
+    height: 40px;
+}
+.calendar-table th.time-col {
+    width: 60px;
+    background-color: #fff;
+}
+.calendar-table th.today-col {
+    background-color: #EBF5FF; /* สีไฮไลท์วันปัจจุบัน */
+    color: var(--primary);
+    font-weight: 700;
+}
+.calendar-table td.time-cell {
+    font-size: 0.8rem;
+    color: var(--text-light-grey);
+    background-color: #fff;
+    vertical-align: middle;
+}
+.btn-sync {
+    background-color: #4285F4; 
+    color: white; 
+    padding: 0.75rem 1.5rem; 
+    border: none; 
+    border-radius: 8px; 
+    font-size: 1rem; 
+    cursor: pointer; 
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 0.3s ease;
+}
+/* Event Card in Calendar */
+.cal-event {
+    background-color: #E3F2FD;
+    color: var(--primary-dark);
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    text-align: left;
+    margin-bottom: 4px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.cal-event:hover {
+    transform: scale(1.02);
+    background-color: #BBDEFB;
+}
+.cal-event-time {
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+.cal-event-subject {
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* POPUP MODAL STYLES */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+}
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 400px;
+    position: relative;
+    animation: slideUp 0.3s ease;
+}
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+.modal-close {
+    position: absolute;
+    top: 15px; right: 15px;
+    background: none; border: none;
+    font-size: 1.5rem; cursor: pointer; color: #999;
+}
+.modal-header h3 { 
+    margin: 0; 
+    color: var(--primary); 
+}
+.modal-body { 
+    margin-top: 1rem; 
+}
+.modal-row { 
+    display: flex; 
+    margin-bottom: 10px; 
+}
+.modal-label { 
+    width: 100px; 
+    font-weight: 600; 
+    color: var(--text-grey); 
+}
+.modal-value { 
+    color: var(--text-dark); 
+    flex: 1; 
+}
+.modal-status-badge {
+    padding: 4px 10px; 
+    border-radius: 20px; font-size: 0.8rem;
+    background: #eee; color: #555;
+}
+.modal-status-badge.completed { 
+    background: #d4edda; 
+    color: #155724; 
+}
+.btn-start-in-modal {
+    margin-top: 20px;
+    background: var(--primary); 
+    color: white; 
+    border: none; 
+    width: 100%; 
+    padding: 10px; 
+    border-radius: 12px; 
+    font-size: 1rem; 
+    font-weight: 500; 
+    cursor: pointer; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    gap: 8px; 
+    text-decoration: none; 
+}
+/* --- Flash Message Popup CSS --- */
+.flash-message-container {
+    position: fixed;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999; /* ให้ลอยอยู่เหนือทุกอย่าง */
+    width: auto;
+    min-width: 300px;
+    max-width: 90%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none; /* เพื่อให้คลิกทะลุได้ถ้าไม่ได้คลิกที่กล่อง */
+}
+.alert {
+    padding: 15px 25px;
+    border-radius: 50px; /* ทรงแคปซูลมนๆ */
+    background-color: #fff;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-weight: 500;
+    font-size: 1rem;
+    animation: slideDown 0.5s ease-out;
+    pointer-events: auto; /* ให้ตัวกล่องรับคลิกได้ */
+    border: none; /* ลบขอบเดิม */
+}
+.alert-success {
+    background-color: #E8F5E9; /* สีเขียวอ่อน */
+    color: #2E7D32;
+    border: 1px solid #C8E6C9;
+}
+.alert-info, .alert-warning, .alert-error {
+    background-color: #FFF3E0;
+    color: #E65100;
+    border: 1px solid #FFE0B2;
+}
+/* CSS สำหรับ Stat Item ให้ดูคลิกได้ */
+.stat-item-clickable {
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+    border-radius: 12px;
+    padding: 10px;
+}
+.stat-item-clickable:hover {
+    transform: translateY(-3px);
+    background-color: #f8f9fa;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+/* CSS สำหรับ List วิชาใน Modal */
+.subject-list-modal {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 400px;
+    overflow-y: auto; /* ให้ scroll ได้ถ้าวิชาเยอะ */
+}
+.subject-row-modal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    transition: background 0.2s;
+}
+.subject-row-modal:last-child {
+    border-bottom: none;
+}
+.subject-row-modal:hover {
+    background-color: #f9f9f9;
+}
+.subj-info h4 {
+    margin: 0 0 4px 0;
+    color: var(--text-dark);
+    font-size: 1rem;
+}
+.subj-meta {
+    font-size: 0.85rem;
+    color: var(--text-light-grey);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.file-badge {
+    background-color: #e3f2fd;
+    color: #1976d2;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+.btn-delete-sm {
+    color: #ef5350;
+    background: none;
+    border: 1px solid #ef5350;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+.btn-delete-sm:hover {
+    background-color: #ffebee;
+}
+@keyframes slideDown {
+    from { transform: translateY(-100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+@keyframes fadeOut {
+    to { opacity: 0; transform: translateY(-20px); }
+}

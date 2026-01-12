@@ -20,10 +20,10 @@ from google.auth.transport import requests as google_requests
 from django.contrib.auth import login
 from django.conf import settings
 
-from core.google_calendar import exchange_code_for_token, get_auth_url, sync_sessions_to_google
+from core.google_calendar import delete_event_from_google, exchange_code_for_token, get_auth_url, sync_sessions_to_google
 from smart_study_planner import settings
 
-from .forms import CustomUserCreationForm, CustomAuthenticationForm, SubjectForm, UserSettingsForm
+from .forms import CustomUserCreationForm, CustomAuthenticationForm, SubjectForm, UserSettingsForm, UserUpdateForm
 from .models import CustomUser, File, QuizResult, StudySummary, Subject, UserAvailability, UserSettings, StudySession
 from .ai_service import generate_content_summary, generate_quiz_questions, generate_study_schedule
 
@@ -223,7 +223,11 @@ def homepage_view(request):
     ).order_by('start_time')[:20] 
 
     # 3. ข้อมูลสถิติ
-    total_subjects = Subject.objects.filter(user=user).count()
+    all_subjects = Subject.objects.filter(user=user).annotate(
+        file_count=Count('subject_files')
+    ).order_by('name')
+    
+    total_subjects = all_subjects.count()
     total_plans = StudySession.objects.filter(user=user).count()
     
     completed_all = StudySession.objects.filter(user=user, is_completed=True).count()
@@ -246,6 +250,7 @@ def homepage_view(request):
         'current_date_str': current_date.strftime('%Y-%m-%d'),
         # ข้อมูลเดิม
         'total_subjects': total_subjects,
+        'all_subjects': all_subjects, # ✅ ส่งตัวแปรนี้เพิ่มเข้าไป
         'total_plans': total_plans,
         'readiness_score': readiness_score,
         'exams_data': exams_data,
@@ -299,6 +304,12 @@ def add_subject_view(request):
 def delete_subject_view(request, subject_id):
     subject = get_object_or_404(Subject, subject_id=subject_id, user=request.user)
     if request.method == 'POST':
+        # --- ✅ เพิ่ม: ตามลบ Event ใน Google ของวิชานี้ ---
+        related_sessions = StudySession.objects.filter(subject=subject)
+        for session in related_sessions:
+            if session.google_event_id:
+                delete_event_from_google(request.user, session.google_event_id)
+                
         subject.delete()
         return redirect('add_subject')
     return redirect('add_subject')
@@ -646,6 +657,32 @@ def sync_calendar_view(request):
         messages.error(request, f"Sync Error: {msg}")
         
     return redirect('home_page')
+
+@login_required
+def edit_profile_view(request):
+    # ดึง Setting เดิม หรือสร้างใหม่ถ้ายังไม่มี
+    user_settings, created = UserSettings.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        # รับข้อมูลจากทั้ง 2 ฟอร์ม (สังเกต request.FILES สำหรับรูปภาพ)
+        user_form = UserUpdateForm(request.POST, request.FILES, instance=request.user)
+        settings_form = UserSettingsForm(request.POST, instance=user_settings)
+
+        if user_form.is_valid() and settings_form.is_valid():
+            user_form.save()
+            settings_form.save()
+            messages.success(request, 'อัปเดตโปรไฟล์เรียบร้อยแล้ว!')
+            return redirect('edit_profile') # โหลดหน้าเดิมเพื่อให้เห็นข้อมูลใหม่
+    else:
+        # ถ้าเป็น GET ให้ดึงข้อมูลเดิมมาแสดง
+        user_form = UserUpdateForm(instance=request.user)
+        settings_form = UserSettingsForm(instance=user_settings)
+
+    context = {
+        'user_form': user_form,
+        'settings_form': settings_form
+    }
+    return render(request, 'core/edit_profile.html', context)
 
 def logout_view(request):
     logout(request)

@@ -1,0 +1,340 @@
+/* Global Background */
+body { 
+    font-family: kanit, sans-serif;
+    background-color: #EDF0F9; 
+}
+.navbar { 
+    background: var(--card-bg); 
+    padding: 1rem 2rem; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+    position: sticky; 
+    top: 0; 
+    z-index: 100; 
+}
+.logo-icon { 
+    height: 40px; 
+}
+.nav-left { 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    font-weight: 600; 
+    color: var(--primary); 
+    font-size: 1.2rem; 
+}
+.profile-container { 
+    position: relative; 
+    cursor: pointer; 
+    display: flex; 
+    align-items: center; 
+}
+.profile-popup { 
+    display: none; 
+    position: absolute; 
+    top: 60px; 
+    right: 0; 
+    width: 250px; 
+    background-color: #fff; 
+    border-radius: 8px; 
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+    z-index: 1000; padding: 1rem; 
+}
+.profile-popup-header { 
+    text-align: center; 
+    padding-bottom: 1rem; 
+    border-bottom: 1px solid #eee; 
+}
+.profile-img { 
+    width: 40px; 
+    height: 40px; 
+    min-width: 40px;
+    min-height: 40px;
+    background: #E0E0E0; 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-weight: bold; 
+    color: #555; 
+    margin-right: 5px; 
+    overflow: hidden;
+}
+.profile-img-nav {
+   width: 100%;            /* ให้เต็มความกว้างของ container */
+    height: 100%;           /* ให้เต็มความสูงของ container */
+    border-radius: 50%;     /* ทำเป็นวงกลม */
+    object-fit: cover; 
+    display: block;
+}
+  
+/* Main Container */
+.study-container {
+    max-width: 1000px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* จัดทุกอย่างใน Container ให้อยู่กลางแนวตั้ง */
+    min-height: 600px;
+}
+.study-header { 
+    text-align: center; 
+    margin-bottom: 40px; 
+}
+.study-header h1 { 
+    font-size: 2rem; 
+    color: #2C3E50; 
+    margin: 0; 
+    font-weight: 700; 
+}
+/* --- Grid Layout (แก้ไขเพื่อให้เส้นแบ่งอยู่ตรงกลาง) --- */
+.study-grid {
+    display: grid;
+    /* เปลี่ยนจาก 1.2fr เป็น 1fr เพื่อให้ซ้ายขวาเท่ากัน เส้นจะอยู่ตรงกลาง */
+    grid-template-columns: 1fr 1px 1fr; 
+    gap: 40px;
+    width: 100%;
+    align-items: center;
+}
+/* Divider */
+.divider { 
+    background-color: #E0E0E0; 
+    width: 1px; 
+    height: 100%; 
+    min-height: 300px; 
+    /* เพิ่ม margin auto เพื่อความชัวร์ */
+    margin: 0 auto; 
+}
+/* Left Column: Info */
+.info-column { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 20px; 
+}
+.info-row { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 20px; 
+}
+.info-group label { 
+    display: block; 
+    font-size: 0.85rem; 
+    color: #666; 
+    margin-bottom: 5px; 
+    font-weight: 500; 
+}
+
+.info-box {
+    border: 1px solid #E0E0E0;
+    border-radius: 12px;
+    padding: 12px 15px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2C3E50;
+    background: #fff;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+/* Right Column: Visual (Success Circle) */
+.visual-column {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.success-wrapper {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+/* SVG Styles for Success Checkmark */
+.success-ring {
+    fill: none;
+    stroke: #00C805;
+    stroke-width: 15;
+    stroke-linecap: round;
+    width: 100%;
+    height: 100%;
+}
+
+.check-circle-fill {
+    background-color: #00C805;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0, 200, 5, 0.3);
+    animation: scaleIn 0.5s ease-out;
+}
+.check-icon {
+    color: white;
+    font-size: 5rem;
+    font-weight: bold;
+}
+/* Buttons Section */
+.action-buttons-row {
+    margin-top: 50px;
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    width: 100%;
+    flex-wrap: wrap;
+}
+/* Wrapper สำหรับปุ่มกลับ เพื่อจัดให้อยู่ตรงกลาง */
+.back-btn-wrapper {
+    width: 100%; 
+    max-width: 400px; 
+    margin: 15px auto 0 auto; /* auto ซ้ายขวา เพื่อจัดกลาง */
+    display: flex;
+    justify-content: center;
+}
+.btn-action {
+    padding: 15px 30px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-align: center;
+    text-decoration: none;
+    min-width: 180px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.btn-action:hover { 
+    transform: translateY(-2px); 
+}
+/* Button Colors */
+.btn-summary {
+    background-color: #AB70FF;
+    color: white;
+    box-shadow: 0 4px 12px rgba(153, 81, 255, 0.3);
+}
+.btn-summary:hover { 
+    background-color: #8339f0; 
+}
+.btn-quiz {
+    background-color: #077AFE;
+    color: white;
+    box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+}
+.btn-quiz:hover { 
+    background-color: #155cb8; 
+}
+.btn-back-home {
+    background-color: white;
+    color: #333;
+    border: 1px solid #ddd;
+    width: 100%; /* ให้เต็ม wrapper */
+}
+.btn-back-home:hover { 
+    background-color: #f8f9fa; 
+}
+@keyframes scaleIn {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+/* Responsive */
+@media (max-width: 768px) {
+    .study-grid { 
+        grid-template-columns: 1fr; 
+        gap: 30px; 
+    }
+    .divider { 
+        width: 100%; 
+        height: 1px; 
+        min-height: 1px; 
+        margin: 20px 0;
+    }
+    .action-buttons-row { 
+        flex-direction: column; 
+        align-items: center;
+    }
+    .btn-action { 
+        width: 100%; 
+        max-width: 400px;
+    }
+}
+.modal-overlay {
+    display: none; /* ซ่อนไว้ก่อน */
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px); /* เบลอฉากหลัง */
+}
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    animation: popUp 0.3s ease;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+.modal-header { 
+    border-bottom: 1px solid #eee; 
+    padding-bottom: 10px; margin-bottom: 15px; 
+}
+.modal-header h3 { 
+    margin: 0; color: #AB70FF; 
+}
+/* จัด Format HTML ที่ AI ส่งมา */
+#resultState ul { 
+    padding-left: 20px; 
+}
+#resultState li { 
+    margin-bottom: 8px; 
+}
+#resultState strong { 
+    color: #336BF9; 
+}
+@keyframes popUp {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+/* Quiz Styles */
+.question-box {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+.question-text {
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #2C3E50;
+}
+.option-label {
+    display: block;
+    padding: 8px 12px;
+    margin: 5px 0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.option-label:hover { background-color: #f8f9fa; }
+.option-label input { margin-right: 10px; }
+
+/* Correct/Wrong Styles */
+.option-label.correct { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+.option-label.wrong { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }

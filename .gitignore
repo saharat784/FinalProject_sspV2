@@ -1,6 +1,9 @@
 # ไฟล์ความลับ
 .env
 
+# ไฟล์สำหรับตรวจสอบโมเดล AI
+check_models.py
+
 # Google Credentials
 client_secret.json
 credentials.json

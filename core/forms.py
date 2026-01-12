@@ -65,4 +65,27 @@ class SubjectForm(forms.ModelForm):
 class UserSettingsForm(forms.ModelForm):
     class Meta:
         model = UserSettings
-        fields = ['session_duration', 'break_duration', 'notifications_enabled']
+        # เพิ่ม 'bio' และ 'academic_goal' ต่อท้าย
+        fields = ['session_duration', 'break_duration', 'notifications_enabled', 'bio', 'academic_goal']
+        
+        widgets = {
+            # อันเดิม (ถ้าไม่ได้ใส่ widget ไว้ก็ปล่อยว่างได้ แต่แนะนำให้ใส่ class form-control)
+            'session_duration': forms.NumberInput(attrs={'class': 'form-control'}),
+            'break_duration': forms.NumberInput(attrs={'class': 'form-control'}),
+            'notifications_enabled': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            
+            # อันใหม่
+            'bio': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'คติประจำใจ หรือ คำอธิบายตัวเองสั้นๆ'}),
+            'academic_goal': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'เช่น อยากได้เกรด 3.50 ขึ้นไป'}),
+        }
+        
+class UserUpdateForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['first_name', 'last_name', 'email', 'profile_picture']
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ชื่อจริง'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'นามสกุล'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'readonly': 'readonly'}), # อีเมลให้โชว์เฉยๆ ห้ามแก้ (เพื่อความปลอดภัยเบื้องต้น)
+            'profile_picture': forms.FileInput(attrs={'class': 'form-control'}),
+        }

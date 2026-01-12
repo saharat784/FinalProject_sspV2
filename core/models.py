@@ -7,6 +7,8 @@ import uuid
 # ตารางผู้ใช้ (Users)
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True) # เพิ่มบรรทัดนี้
+    # ✅ เพิ่ม: รูปโปรไฟล์ (เก็บไฟล์จริง)
+    profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
     class Meta:
         db_table = 'users'
 
@@ -16,6 +18,9 @@ class UserSettings(models.Model):
     session_duration = models.IntegerField(default=60)
     break_duration = models.IntegerField(default=10)
     notifications_enabled = models.BooleanField(default=True)
+    # ✅ เพิ่ม: ข้อมูลโปรไฟล์เพิ่มเติม
+    bio = models.CharField(max_length=255, blank=True, null=True, verbose_name="คติประจำใจ")
+    academic_goal = models.CharField(max_length=255, blank=True, null=True, verbose_name="เป้าหมายการเรียน (เช่น GPA 4.00)")
 
     def __str__(self):
         return f"Settings for {self.user.username}"
@@ -60,7 +65,7 @@ class File(models.Model):
     file = models.FileField(upload_to='subject_materials/') 
     
     file_name = models.CharField(max_length=255)
-    file_type = models.CharField(max_length=50)
+    file_type = models.CharField(max_length=255)
     size_in_bytes = models.BigIntegerField()
     
     # เพิ่มลำดับ

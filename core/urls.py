@@ -22,6 +22,7 @@ urlpatterns = [
     path('start-studying/<uuid:session_id>/', views.start_studying_view, name='start_studying'),
     path('finished-studying/<uuid:session_id>/', views.finished_studying_view, name='finished_studying'),
     path('complete-session/<uuid:session_id>/', views.complete_session_view, name='complete_session'),
+    path('profile/edit/', views.edit_profile_view, name='edit_profile'),
     # summary URLs
     path('api/get-summary/<uuid:session_id>/', views.get_session_summary, name='get_session_summary'),
     path('summary/<uuid:session_id>/', views.study_summary_view, name='study_summary'),
