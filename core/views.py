@@ -28,7 +28,15 @@ from .models import CustomUser, File, QuizResult, StudySummary, Subject, UserAva
 from .ai_service import generate_content_summary, generate_quiz_questions, generate_study_schedule
 
 # ตั้งค่า Path (ใช้ตัวเดียวกับที่มีอยู่)
-CLIENT_SECRETS_FILE = os.path.join(settings.BASE_DIR, "client_secret.json")
+# CLIENT_SECRETS_FILE = os.path.join(settings.BASE_DIR, "client_secret.json")
+
+# ✅ ใช้อันใหม่นี้แทน:
+# ถ้ามีไฟล์ใน /etc/secrets/ (บน Render) ให้ใช้
+if os.path.exists('/etc/secrets/client_secret.json'):
+    CLIENT_SECRETS_FILE = '/etc/secrets/client_secret.json'
+else:
+    # ถ้าไม่มี (ในเครื่องเรา) ให้ใช้ที่เดิม
+    CLIENT_SECRETS_FILE = os.path.join(settings.BASE_DIR, "client_secret.json")
 
 # Scopes สำหรับ Login (ขอแค่ข้อมูลพื้นฐาน)
 LOGIN_SCOPES = [
@@ -36,7 +44,10 @@ LOGIN_SCOPES = [
     'https://www.googleapis.com/auth/userinfo.email',
     'https://www.googleapis.com/auth/userinfo.profile'
 ]
-LOGIN_REDIRECT_URI = 'http://127.0.0.1:8000/google/login/callback/'
+
+LOGIN_REDIRECT_URI = 'https://http://127.0.0.1:8000/google/login/callback/' # สำหรับทดสอบบนเครื่อง localhost
+
+LOGIN_REDIRECT_URI = 'https://smart-study-planner-wa6t.onrender.com/google/login/callback/' # สำหรับใช้งานจริงบน Render
 
 def landing_page_view(request):
     return render(request, 'core/landing_page.html')
@@ -61,7 +72,7 @@ def google_login_callback(request):
     
     try:
         
-        os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+        # os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
         flow = Flow.from_client_secrets_file(
             CLIENT_SECRETS_FILE,
