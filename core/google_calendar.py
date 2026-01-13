@@ -13,7 +13,9 @@ from .models import GoogleCredential, StudySession
 # ตั้งค่า Path ของไฟล์ client_secret.json
 CLIENT_SECRETS_FILE = os.path.join(settings.BASE_DIR, "client_secret.json")
 SCOPES = ['https://www.googleapis.com/auth/calendar.events']
-REDIRECT_URI = 'http://127.0.0.1:8000/google/callback/'
+
+REDIRECT_URI = 'http://127.0.0.1:8000/google/callback/'  # สำหรับทดสอบบนเครื่อง localhost
+REDIRECT_URI = 'https://smart-study-planner-wa6t.onrender.com/google/callback/'  # สำหรับใช้งานจริงบน Render
 
 def get_auth_url():
     """สร้าง URL เพื่อส่งผู้ใช้ไป Login Google"""

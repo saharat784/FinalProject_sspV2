@@ -24,13 +24,18 @@ GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 
 ALLOWED_HOSTS = ['*']
 
-CSRF_TRUSTED_ORIGINS = ['https://simple-useful-anteater.ngrok-free.app']
-LOGIN_REDIRECT_URI = 'http://127.0.0.1:8000/google/login/callback/'
-
+CSRF_TRUSTED_ORIGINS = ['https://smart-study-planner-wa6t.onrender.com']
+LOGIN_REDIRECT_URI = 'https://http://127.0.0.1:8000/google/login/callback/' # สำหรับทดสอบบนเครื่อง localhost
+LOGIN_REDIRECT_URI = 'https://smart-study-planner-wa6t.onrender.com/google/login/callback/' # สำหรับใช้งานจริงบน Render
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 # Application definition
 
 INSTALLED_APPS = [
+    'cloudinary_storage',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -39,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'core',
     'widget_tweaks',
+    'cloudinary',
 ]
 
 MIDDLEWARE = [
@@ -92,7 +98,7 @@ DATABASES = {
     'default': dj_database_url.config(
         # บรรทัดนี้สำคัญ: มันจะเช็คว่าถ้ามี DATABASE_URL (บน Render) ให้ใช้
         # แต่ถ้าไม่มี (บนเครื่องเรา) ให้กลับไปใช้ SQLite เหมือนเดิม ไม่ต้องแก้ไปแก้มา
-        default=os.getenv('DATABASE_URL', 'sqlite:///db.sqlite3'),
+        default=os.getenv('DATABASE_URL', 'postgresql://smart_study_planner_user:y742A6XkLED2a373JLtj8GKgCfoOtfEb@dpg-d5jbsp6mcj7s739sun1g-a/smart_study_planner'),
         conn_max_age=600
     )
 }
@@ -158,3 +164,13 @@ LOGIN_URL = 'login'
 
 # (ทางเลือก) บอกว่าจะให้เด้งไปไหนถ้า Login สำเร็จแล้วไม่มี parameter next
 LOGIN_REDIRECT_URL = 'home_page'
+
+# --- Cloudinary Settings ---
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
+}
+
+# บอก Django ว่าถ้ามีการอัปโหลดไฟล์ (Media) ให้ไปเก็บที่ Cloudinary
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
