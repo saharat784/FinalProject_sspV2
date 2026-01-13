@@ -25,7 +25,13 @@
                 </div>
             {% endif %}
         </div>
-        <span style="font-weight: bold;">{{ user.username }}</span>
+        <span style="font-weight: bold;">
+            {% if user.first_name %}
+                {{ user.first_name }}
+            {% else %}
+                {{ user.username }}
+            {% endif %}
+        </span>
         <div id="profile-popup" class="profile-popup">
             <div class="profile-popup-header">
                 <div class="profile-img">
@@ -41,7 +47,7 @@
     <div class="result-card">
         <h2 style="margin-bottom: 30px; color: #000000;">ผลคะแนนของคุณ</h2>
         
-        <div class="score-circle">
+        <div class="score-circle" style="border-color: {% if percentage >= 50 %}#2ECC71{% else %}#db192c{% endif %};">
             <div class="score-big">{{ result.score }}</div>
             <div class="score-total">/ {{ result.total_questions }}</div>
         </div>

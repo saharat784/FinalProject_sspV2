@@ -28,7 +28,13 @@
                 </div>
             {% endif %}
         </div>
-        <span style="font-weight: bold;">{{ user.username }}</span>
+        <span style="font-weight: bold;">
+            {% if user.first_name %}
+                {{ user.first_name }}
+            {% else %}
+                {{ user.username }}
+            {% endif %}
+        </span>
         <div id="profile-popup" class="profile-popup">
             <div class="profile-popup-header">
                 <div class="profile-img">

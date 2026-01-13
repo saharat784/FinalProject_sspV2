@@ -13,6 +13,7 @@ body {
     padding: 0;
 }
 .navbar {
+    height: 50px;
     display: flex;
     align-items: center;
     padding: 1.25rem 2rem;
@@ -233,9 +234,11 @@ input:checked + .slider:before {
     border: none; 
     cursor: pointer; 
 }
-.btn-back { 
+.btn-back {
+    text-align: center; 
     background-color: #e0e0e0; 
-    color: #333; 
+    color: #333;
+    width: 150px; 
 }
 .btn-back:hover {
     background-color: #5a6268;

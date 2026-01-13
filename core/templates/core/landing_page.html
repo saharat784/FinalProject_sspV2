@@ -1,24 +1,73 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Study Planner</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" type="text/css" href="{% static 'core/landing_page.css' %}">
 </head>
 <body>
+    
     <nav class="navbar">
-        <div class="navbar-logo">
+        <div class="navbar-brand">
             <img class="logo-icon" src="{% static 'images/logo.png' %}" alt="Logo">
             <span>Smart Study Planner</span>
         </div>
         <div class="navbar-links">
-            <a href="{% url 'login' %}">เข้าสู่ระบบ</a>
-            <a href="{% url 'register' %}" class="btn">ลงทะเบียน</a>
+            <a href="{% url 'login' %}" class="nav-link">เข้าสู่ระบบ</a>
+            <a href="{% url 'register' %}" class="btn-register">ลงทะเบียน</a>
         </div>
     </nav>
-    <div class="hero-section">
-        <h1>วางแผนการเรียน<br>อย่างฉลาด</h1>
-        <a href="{% url 'register' %}" class="btn-primary">เริ่มใช้งาน</a>
+
+    <div class="hero-container">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                วางแผนการเรียน<br>
+                <span class="highlight-text">อย่างฉลาด</span>
+            </h1>
+            
+            <a href="{% url 'register' %}" class="btn-start">เริ่มใช้งาน</a>
+        </div>
+
+        <div class="features-section">
+            
+            <div class="feature-card">
+                <div class="icon-box gradient-1">
+                    <i class="fas fa-magic"></i>
+                </div>
+                <div class="card-text">
+                    <h3>วางแผนอัตโนมัติ</h3>
+                    <p>วิเคราะห์เวลาว่างและความยากของวิชา เพื่อสร้างตารางเรียนที่เหมาะสมที่สุด</p>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon-box gradient-2">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="card-text">
+                    <h3>ตารางเรียนส่วนตัว</h3>
+                    <p>ปรับแต่งตารางเรียนตามไลฟ์สไตล์ของคุณ ไม่ว่าจะเป็นนักเรียน หรือนักศึกษา</p>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon-box gradient-3">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="card-text">
+                    <h3>ติดตามความคืบหน้า</h3>
+                    <p>ดูสถิติการเรียนแบบเรียลไทม์ พร้อมกราฟและรายงานที่ช่วยกระตุ้นให้เรียนต่อไป</p>
+                </div>
+            </div>
+
+        </div>
     </div>
+
+    <div class="bottom-line"></div>
+
 </body>
 </html>

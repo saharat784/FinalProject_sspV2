@@ -60,6 +60,9 @@ def google_login_callback(request):
     state = request.session.get('google_oauth_state')
     
     try:
+        
+        os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
         flow = Flow.from_client_secrets_file(
             CLIENT_SECRETS_FILE,
             scopes=LOGIN_SCOPES,
@@ -309,7 +312,7 @@ def delete_subject_view(request, subject_id):
         for session in related_sessions:
             if session.google_event_id:
                 delete_event_from_google(request.user, session.google_event_id)
-                
+
         subject.delete()
         return redirect('add_subject')
     return redirect('add_subject')

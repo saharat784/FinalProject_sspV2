@@ -1,66 +1,230 @@
+/* Reset & Global Styles */
+:root {
+    --primary: #336BF9;
+    --primary-dark: #2554D1;
+    --secondary: #6C757D;
+    --success: #2ECC71;
+    --bg-color: #EDF0F9;
+    --card-bg: #FFFFFF;
+    --text-dark: #2C3E50;
+    --text-grey: #666666;
+    --text-light-grey: #888888;
+    --danger: #FF6B6B;
+    --danger-bg: #FFF5F5;
+    --border-color: #E0E0E0;
+}
 body {
     font-family: 'Kanit', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #EDF0F9;
+    background-color: #EDF2F9; /* พื้นหลังสีฟ้าอ่อนๆ ตามรูป */
     color: #333;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
+
+a { text-decoration: none; }
+
+/* Navbar Styling */
 .navbar {
+    height: 50px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 1rem 2rem;
     background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
-.logo-icon {
-    height: 40px;
-}
-.navbar-logo {
+
+.navbar-brand {
     display: flex;
     align-items: center;
-    color: var(--primary);
+    font-size: 1.5rem;    /* ขนาดตัวหนังสือ */
+    font-weight: 700;
+    color: var(--primary); /* สีม่วงอ่อนๆ */
 }
-.navbar-logo img {
-    height: 40px;
-    margin-right: 10px;
+
+.logo-icon {
+    height: 85px;         /* 1. ปรับความสูงให้ใหญ่สะใจไปเลย (ใหญ่กว่า Navbar ก็ได้) */
+    width: auto;
+    
+    /* 2. เทคนิค Margin ติดลบ: บอก Browser ว่า "ไม่ต้องคิดความสูงส่วนนี้" */
+    margin-top: -20px;    
+    margin-bottom: -20px; 
+    
+    /* 3. ปรับตำแหน่งให้สวยงาม */
+    margin-right: 5px;   
+    position: relative;   /* ให้รูปดูลอยมีมิติ */
+    z-index: 10;          /* มั่นใจว่ารูปจะอยู่ชั้นบนสุด */
+    
+    /* (แถม) ใส่เงาเล็กน้อยให้ดูเด้งออกมา */
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
 }
-.navbar-links a {
-    text-decoration: none;
+
+.navbar-links {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.nav-link {
     color: #333;
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
-    transition: background-color 0.3s;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: color 0.3s;
 }
-.navbar-links a.btn {
-    background-color: #007bff;
-    color: #fff;
-    border: none;
+
+.nav-link:hover {
+    color: #667eea;
 }
-.navbar-links a:hover {
-    background-color: #eee;
+
+.btn-register {
+    background: linear-gradient(135deg, #336BF9, #9951FF);
+    color: white;
+    padding: 0.6rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
-.navbar-links a.btn:hover {
-    background-color: #9951FF;
+
+.btn-register:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(118, 75, 162, 0.3);
 }
-.hero-section {
+
+/* Hero Section Styling */
+.hero-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+    max-width: 1000px;
+    margin: 0 auto;
+    width: 90%;
+}
+
+.hero-content {
     text-align: center;
-    padding: 10rem 2rem;
+    margin-bottom: 4rem;
 }
-.hero-section h1 {
-    font-size: 3rem;
-    margin-bottom: 5rem;
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 2rem;
+    color: #000;
 }
-.hero-section .btn-primary {
-    text-decoration: none;
-    background-color: #007bff;
-    color: #fff;
-    padding: 0.75rem 2rem;
-    border-radius: 10px;
-    font-size: 1.25rem;
-    font-weight: bold;
-    transition: background-color 0.3s;
+
+.highlight-text {
+    background: linear-gradient(90deg, #667eea 0%, #9951FF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
 }
-.hero-section .btn-primary:hover {
-    background-color: #9951FF;
+
+.btn-start {
+    background: linear-gradient(135deg, #336BF9, #9951FF);
+    color: white;
+    padding: 1rem 3rem;
+    border-radius: 12px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    display: inline-block;
+    box-shadow: 0 4px 15px rgba(51, 107, 249, 0.3);
+    transition: all 0.3s ease;
+}
+
+.btn-start:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(51, 107, 249, 0.4);
+}
+
+/* Features Cards Styling */
+.features-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+}
+
+.feature-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    transition: transform 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+}
+
+.icon-box {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.5rem;
+    color: white;
+}
+
+/* Gradient Backgrounds for Icons */
+.gradient-1 { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); }
+.gradient-2 { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); }
+.gradient-3 { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); }
+
+.card-text h3 {
+    margin: 0 0 5px 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #2C3E50;
+}
+
+.card-text p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #666;
+    line-height: 1.5;
+}
+
+/* Bottom Decorative Line */
+.bottom-line {
+    height: 4px;
+    background: linear-gradient(90deg, #336BF9 0%, #9951FF 100%);
+    width: 100%;
+    margin-top: auto; /* ดันลงไปล่างสุด */
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 1rem;
+    }
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    .feature-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 2rem;
+    }
+    .icon-box {
+        margin-bottom: 10px;
+    }
 }

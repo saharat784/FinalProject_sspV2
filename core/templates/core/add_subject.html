@@ -42,9 +42,9 @@
         <div class="add-subject-card">
             <h2>เพิ่มวิชาใหม่</h2>
 
-            <form method="post" enctype="multipart/form-data">
+            <form method="post" enctype="multipart/form-data" style="height: 100%; display: flex; flex-direction: column;">
                 {% csrf_token %}
-
+            
                 <div class="form-group">
                     <label for="{{ form.name.id_for_label }}">ชื่อวิชา</label>
                     {{ form.name }}
@@ -52,19 +52,14 @@
                         <small class="error-text">{{ form.name.errors|first }}</small>
                     {% endif %}
                 </div>
-
+            
                 <div class="form-row">
                     <div class="form-group half">
                         <label for="{{ form.difficulty.id_for_label }}">ระดับความยาก</label>
                         {{ form.difficulty }}
                     </div>
-
-                    <!-- <div class="form-group half">
-                        <label for="{{ form.importance.id_for_label }}">ลำดับความสำคัญ</label>
-                        {{ form.importance }}
-                    </div> -->
                 </div>
-
+            
                 <div class="form-group">
                     <label for="{{ form.exam_date.id_for_label }}">วันและเวลาที่สอบ</label>
                     {{ form.exam_date }}
@@ -72,35 +67,33 @@
                         <small class="error-text">{{ form.exam_date.errors|first }}</small>
                     {% endif %}
                 </div>
-
-                <!-- <div class="form-group">
-                    <label for="file-upload">ไฟล์ประกอบการเรียน (เลือกได้หลายไฟล์)</label>
-                    <input type="file" name="files" id="file-upload" class="form-control" multiple>
-                    <small style="color: #666; font-size: 0.85rem;">รองรับ .pdf, .docx, .pptx, .txt</small>
-                </div> -->
-
+            
                 <div class="form-group">
-                    <label for="file-upload" style="font-weight: 600; color: #2c3e50;">
-                        <!-- <i class="fas fa-file-upload"></i>  -->
-                        ไฟล์ประกอบการเรียน (เลือกได้หลายไฟล์)
-                    </label>
+                    <label style="margin-bottom: 10px;">ไฟล์ประกอบการเรียน</label>
 
-                    <input type="file" name="files" id="file-upload" class="form-control" multiple accept=".pdf,.docx,.pptx,.txt" onchange="handleFileSelect(event)">
-                    <small style="color: #666; font-size: 0.85rem; display: block; margin-top: 5px;">
-                        รองรับ .pdf, .docx, .pptx, .txt (สูงสุด 5 ไฟล์, ไม่เกิน 10MB/ไฟล์)
-                    </small>
+                    <div class="file-upload-wrapper">
+                        <input type="file" name="files" id="file-upload" class="file-upload-input" 
+                               multiple accept=".pdf,.docx,.pptx,.txt" onchange="handleFileSelect(event)">
+
+                        <label for="file-upload" class="file-upload-label">
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <span class="upload-text">คลิกเพื่อเลือกไฟล์ หรือลากไฟล์มาวางที่นี่</span><br>
+                            <span class="upload-hint">รองรับ .pdf, .docx, .pptx, .txt (สูงสุด 5 ไฟล์)</span>
+                        </label>
+                    </div>
                 </div>
-
-                <div class="form-group" id="file-preview-container" style="display: none;">
-                    <label style="font-weight: 600; color: #2c3e50; margin-bottom: 8px; display: block;">
-                        ไฟล์ที่เลือกแล้ว (<span id="file-count">0</span>)
+            
+                <div class="form-group" id="file-preview-container" style="display: none; margin-bottom: 20px;">
+                    <label style="font-size: 0.9rem; font-weight: 600; color: #2c3e50; margin-bottom: 8px; display: block;">
+                        ไฟล์ที่เลือก (<span id="file-count" style="color:var(--primary);">0</span>)
                     </label>
-
                     <ul id="file-list" class="file-preview-list"></ul>
                 </div>
-
+            
                 <button type="submit" class="btn-add">
-                    <span class="plus-icon"></span> เพิ่มวิชา
+                    เพิ่มวิชา
                 </button>
             </form>
         </div>

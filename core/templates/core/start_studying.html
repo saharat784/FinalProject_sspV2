@@ -26,7 +26,13 @@
                 </div>
             {% endif %}
         </div>
-        <span style="font-weight: bold;">{{ user.username }}</span>
+        <span style="font-weight: bold;">
+            {% if user.first_name %}
+                {{ user.first_name }}
+            {% else %}
+                {{ user.username }}
+            {% endif %}
+        </span>
         <div id="profile-popup" class="profile-popup">
             <!-- <ul class="popup-menu">
                 <li><a href="#">แก้ไขโปรไฟล์</a></li>
@@ -102,7 +108,7 @@
         <button id="btn-toggle" class="btn-action btn-start" onclick="toggleTimer()">เริ่มอ่าน</button>
         
         <button id="btn-skip" type="button" class="btn-action btn-skip" onclick="skipTimer()">
-            <i class="fas fa-forward"></i> ข้าม (Test)
+            ข้าม
         </button>
 
         <a href="{% url 'home_page' %}" class="btn-action btn-back">กลับ</a>
@@ -218,7 +224,7 @@
         modal.style.display = 'flex';
     }
 
-    // ✅ 2. ฟังก์ชันกด "ยืนยัน" ใน Popup
+    //  2. ฟังก์ชันกด "ยืนยัน" ใน Popup
     function confirmSkip() {
         // ปิด Popup ยืนยันก่อน
         document.getElementById('confirmSkipModal').style.display = 'none';
@@ -228,7 +234,7 @@
         finishTimer();
     }
 
-    // ✅ 3. ฟังก์ชันปิด Popup (ยกเลิก)
+    //  3. ฟังก์ชันปิด Popup (ยกเลิก)
     function closeConfirmModal(event) {
         const modal = document.getElementById('confirmSkipModal');
         // ถ้าไม่ส่ง event มา (กดปุ่ม) หรือ กดโดนพื้นหลัง (Overlay)
@@ -250,7 +256,7 @@
         document.getElementById('btn-skip').style.display = 'none'; // ซ่อนปุ่มข้ามด้วย
         btnFinish.style.display = 'block'; 
         
-        // ✅ แสดง Popup แจ้งเตือนสวยๆ แทน Alert เดิม
+        //  แสดง Popup แจ้งเตือนสวยๆ แทน Alert เดิม
         showTimeoutPopup();
         
         // เล่นเสียง (ถ้าต้องการ)

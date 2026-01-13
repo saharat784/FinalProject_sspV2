@@ -20,6 +20,7 @@ body {
     padding: 0;
 }
 .navbar {
+    height: 50px;
     display: flex;
     align-items: center;
     padding: 1.25rem 2rem;
@@ -27,7 +28,8 @@ body {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     margin-bottom: 0;
 }
-.navbar-brand { 
+.navbar-brand {
+    height: 50px; 
     display: flex;
     align-items: center;
     font-weight: 600; 
@@ -259,10 +261,12 @@ body {
 .nav-buttons {
     display: flex;
     justify-content: space-between;
-    margin: 2rem;
+    margin: 20px 0 40px 0;
     gap: 1rem;
+    width: 100%; /* สั่งให้ขยายเต็มความกว้าง container */
+    box-sizing: border-box;
 }
-.btn {
+.btn { 
     padding: 0.875rem 2rem; 
     border: none; 
     border-radius: 25px; 
@@ -278,17 +282,18 @@ body {
 .btn-back {
     background-color: #e0e0e0; 
     color: #333;
-    border-radius: 10px;
+    width: 150px;
+    border-radius: 12px;  
 }
 .btn-back:hover {
     background-color: #545b62;
-    transform: translateY(-1px);
+    transform: translateY(-1px)
 }
 .btn-next {
     background-color: #007bff; ;
     color: white;
-    border-radius: 10px;
-    width: 120px;
+    width: 214px;
+    border-radius: 12px;
 }
 .btn-next:hover {
     background-color: #0056b3;

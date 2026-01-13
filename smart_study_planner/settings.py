@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+import dj_database_url
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -24,6 +25,7 @@ GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 ALLOWED_HOSTS = ['*']
 
 CSRF_TRUSTED_ORIGINS = ['https://simple-useful-anteater.ngrok-free.app']
+LOGIN_REDIRECT_URI = 'http://127.0.0.1:8000/google/login/callback/'
 
 
 # Application definition
@@ -41,6 +43,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', # ✅ เพิ่มบรรทัดนี้ (ต้องอยู่ต่อจาก SecurityMiddleware ทันที)
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -74,15 +77,24 @@ WSGI_APPLICATION = 'smart_study_planner.wsgi.application'
 
 # smart_study_planner/settings.py
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': os.getenv('DB_NAME'),   # ชื่อฐานข้อมูลที่คุณสร้าง
+#         'USER': os.getenv('DB_USER'),     # ชื่อผู้ใช้ PostgreSQL
+#         'PASSWORD': os.getenv('DB_PASSWORD'),    # รหัสผ่าน PostgreSQL
+#         'HOST': os.getenv('DB_HOST'),    # หรือ IP address ของฐานข้อมูล
+#         'PORT': os.getenv('DB_PORT'),       # Port มาตรฐานของ PostgreSQL
+#     }
+# }
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME'),   # ชื่อฐานข้อมูลที่คุณสร้าง
-        'USER': os.getenv('DB_USER'),     # ชื่อผู้ใช้ PostgreSQL
-        'PASSWORD': os.getenv('DB_PASSWORD'),    # รหัสผ่าน PostgreSQL
-        'HOST': os.getenv('DB_HOST'),    # หรือ IP address ของฐานข้อมูล
-        'PORT': os.getenv('DB_PORT'),       # Port มาตรฐานของ PostgreSQL
-    }
+    'default': dj_database_url.config(
+        # บรรทัดนี้สำคัญ: มันจะเช็คว่าถ้ามี DATABASE_URL (บน Render) ให้ใช้
+        # แต่ถ้าไม่มี (บนเครื่องเรา) ให้กลับไปใช้ SQLite เหมือนเดิม ไม่ต้องแก้ไปแก้มา
+        default=os.getenv('DATABASE_URL', 'sqlite:///db.sqlite3'),
+        conn_max_age=600
+    )
 }
 
 # Password validation
@@ -120,6 +132,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = '/static/'
+# โฟลเดอร์ที่จะรวบรวมไฟล์ CSS/JS ทั้งหมดไปกองรวมกัน
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') 
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'core/static')
 ]
@@ -137,3 +152,9 @@ AUTHENTICATION_BACKENDS = [
     'core.backends.EmailBackend', 
     'django.contrib.auth.backends.ModelBackend', 
 ]
+
+# บอก Django ว่าหน้า Login ของเราคือ path ที่ชื่อ 'login' หรือ '/login/'
+LOGIN_URL = 'login' 
+
+# (ทางเลือก) บอกว่าจะให้เด้งไปไหนถ้า Login สำเร็จแล้วไม่มี parameter next
+LOGIN_REDIRECT_URL = 'home_page'

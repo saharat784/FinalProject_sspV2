@@ -1,9 +1,26 @@
 /* Global Styles */
+:root {
+    --primary: #336BF9;
+    --primary-dark: #2554D1;
+    --secondary: #6C757D;
+    --success: #2ECC71;
+    --bg-color: #EDF0F9;
+    --card-bg: #FFFFFF;
+    --text-dark: #2C3E50;
+    --text-grey: #666666;
+    --text-light-grey: #888888;
+    --danger: #FF6B6B;
+    --danger-bg: #FFF5F5;
+    --border-color: #E0E0E0;
+}
 body {
     font-family: kanit, sans-serif;
     background-color: #F0F2F5;
+    margin: 0;
+    padding-bottom: 30px;
 }
 .navbar { 
+    height: 50px;
     background: var(--card-bg); 
     padding: 1rem 2rem; 
     display: flex; 
@@ -14,16 +31,28 @@ body {
     top: 0; 
     z-index: 100; 
 }
-.logo-icon { 
-    height: 40px; 
+.logo-icon {
+    height: 85px;         /* 1. ปรับความสูงให้ใหญ่สะใจไปเลย (ใหญ่กว่า Navbar ก็ได้) */
+    width: auto;
+    
+    /* 2. เทคนิค Margin ติดลบ: บอก Browser ว่า "ไม่ต้องคิดความสูงส่วนนี้" */
+    margin-top: -20px;    
+    margin-bottom: -20px; 
+    
+    /* 3. ปรับตำแหน่งให้สวยงาม */
+    margin-right: 5px;   
+    position: relative;   /* ให้รูปดูลอยมีมิติ */
+    z-index: 10;          /* มั่นใจว่ารูปจะอยู่ชั้นบนสุด */
+    
+    /* (แถม) ใส่เงาเล็กน้อยให้ดูเด้งออกมา */
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
 }
 .nav-left { 
     display: flex; 
     align-items: center; 
-    gap: 10px; 
-    font-weight: 600; 
-    color: var(--primary); 
-    font-size: 1.2rem; 
+    font-size: 1.5rem;    /* ขนาดตัวหนังสือ */
+    font-weight: 700;
+    color: var(--primary);  
 }
 .profile-container { 
     position: relative; 
@@ -38,7 +67,7 @@ body {
 .profile-popup { 
     display: none; 
     position: absolute; 
-    top: 60px; 
+    top: 70px; 
     right: 0; 
     width: 250px; 
     background-color: #fff; 
@@ -297,7 +326,7 @@ body {
 .modal-content-timeout {
     background: white;
     padding: 25px 40px;
-    border-radius: 50px; /* ทรงแคปซูล */
+    border-radius: 12px; /* ทรงแคปซูล */
     box-shadow: 0 10px 40px rgba(0,0,0,0.2);
     text-align: center;
     position: relative;
