@@ -153,7 +153,7 @@ STATIC_URL = '/static/'
 # โฟลเดอร์ที่จะรวบรวมไฟล์ CSS/JS ทั้งหมดไปกองรวมกัน
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') 
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'core/static')
 ]
@@ -193,6 +193,11 @@ STORAGES = {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        # ✅ แก้บรรทัดนี้ (ลบ Manifest ออก)
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
+
+# 2. แก้ใน STATICFILES_STORAGE ด้วย
+# ✅ แก้บรรทัดนี้ (ลบ Manifest ออก)
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
