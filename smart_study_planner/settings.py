@@ -26,9 +26,16 @@ ALLOWED_HOSTS = ['*']
 
 CSRF_TRUSTED_ORIGINS = ['https://smart-study-planner-wa6t.onrender.com']
 
-LOGIN_REDIRECT_URI = 'https://http://127.0.0.1:8000/google/login/callback/' # สำหรับทดสอบบนเครื่อง localhost
+if DEBUG:
+    # สำหรับ Localhost (แก้ typo ให้แล้ว)
+    LOGIN_REDIRECT_URI = 'http://127.0.0.1:8000/google/login/callback/'
+else:
+    # สำหรับ Render (Production)
+    LOGIN_REDIRECT_URI = 'https://smart-study-planner-wa6t.onrender.com/google/login/callback/'
 
-LOGIN_REDIRECT_URI = 'https://smart-study-planner-wa6t.onrender.com/google/login/callback/' # สำหรับใช้งานจริงบน Render
+# LOGIN_REDIRECT_URI = 'https://http://127.0.0.1:8000/google/login/callback/' # สำหรับทดสอบบนเครื่อง localhost
+
+# LOGIN_REDIRECT_URI = 'https://smart-study-planner-wa6t.onrender.com/google/login/callback/' # สำหรับใช้งานจริงบน Render
 
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -144,7 +151,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 # โฟลเดอร์ที่จะรวบรวมไฟล์ CSS/JS ทั้งหมดไปกองรวมกัน
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'core/static')
 ]
@@ -177,4 +184,13 @@ CLOUDINARY_STORAGE = {
 }
 
 # บอก Django ว่าถ้ามีการอัปโหลดไฟล์ (Media) ให้ไปเก็บที่ Cloudinary
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+# DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
