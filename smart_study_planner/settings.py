@@ -153,6 +153,7 @@ STATIC_URL = '/static/'
 # โฟลเดอร์ที่จะรวบรวมไฟล์ CSS/JS ทั้งหมดไปกองรวมกัน
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') 
 
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'core/static')
 ]
@@ -195,6 +196,3 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
-
-
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
