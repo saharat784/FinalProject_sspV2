@@ -149,11 +149,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = '/static/'
-
 # โฟลเดอร์ที่จะรวบรวมไฟล์ CSS/JS ทั้งหมดไปกองรวมกัน
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') 
-
-# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'core/static')
 ]
@@ -186,18 +184,4 @@ CLOUDINARY_STORAGE = {
 }
 
 # บอก Django ว่าถ้ามีการอัปโหลดไฟล์ (Media) ให้ไปเก็บที่ Cloudinary
-# DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
-STORAGES = {
-    "default": {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
-    },
-    "staticfiles": {
-        # ✅ แก้บรรทัดนี้ (ลบ Manifest ออก)
-        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
-    },
-}
-
-# 2. แก้ใน STATICFILES_STORAGE ด้วย
-# ✅ แก้บรรทัดนี้ (ลบ Manifest ออก)
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
