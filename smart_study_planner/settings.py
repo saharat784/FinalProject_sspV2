@@ -151,7 +151,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 # โฟลเดอร์ที่จะรวบรวมไฟล์ CSS/JS ทั้งหมดไปกองรวมกัน
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'core/static')
 ]
@@ -177,10 +177,20 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home_page'
 
 # --- Cloudinary Settings ---
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
-    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
+# CLOUDINARY_STORAGE = {
+#     'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
+#     'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
+#     'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
+# }
+
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        # กลับมาใช้ Manifest ที่คุณบอกว่า Deploy ผ่านฉลุย
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
 }
 
 # บอก Django ว่าถ้ามีการอัปโหลดไฟล์ (Media) ให้ไปเก็บที่ Cloudinary
