@@ -156,8 +156,8 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'core/static')
 ]
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# MEDIA_URL = '/media/'
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -183,15 +183,33 @@ LOGIN_REDIRECT_URL = 'home_page'
 #     'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
 # }
 
-STORAGES = {
-    "default": {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
-    },
-    "staticfiles": {
-        # กลับมาใช้ Manifest ที่คุณบอกว่า Deploy ผ่านฉลุย
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
-}
+if 'RENDER' in os.environ:
+    print("--- 🟢 Using Cloudinary for BOTH Media & Static ---")
 
+    STORAGES = {
+        "default": {
+            # เก็บรูปภาพที่อัปโหลด
+            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+        },
+        "staticfiles": {
+            # เก็บไฟล์ CSS/JS ของเว็บ (ใช้ Cloudinary แทน Whitenoise)
+            "BACKEND": "cloudinary_storage.storage.StaticHashedCloudinaryStorage",
+        },
+    }
+else:
+    print("--- 🏠 Using Local File Storage ---")
+
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = BASE_DIR / 'media'
+    
 # บอก Django ว่าถ้ามีการอัปโหลดไฟล์ (Media) ให้ไปเก็บที่ Cloudinary
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
