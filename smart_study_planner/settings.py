@@ -60,7 +60,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # ✅ เพิ่มบรรทัดนี้ (ต้องอยู่ต่อจาก SecurityMiddleware ทันที)
+     # ✅ เพิ่มบรรทัดนี้ (ต้องอยู่ต่อจาก SecurityMiddleware ทันที)
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
