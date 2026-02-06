@@ -3,7 +3,7 @@
 import os
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from .models import CustomUser, Subject, UserSettings
+from .models import CustomUser, Feedback, Subject, UserSettings
 
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
@@ -88,4 +88,14 @@ class UserUpdateForm(forms.ModelForm):
             'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'นามสกุล'}),
             'email': forms.EmailInput(attrs={'class': 'form-control', 'readonly': 'readonly'}), # อีเมลให้โชว์เฉยๆ ห้ามแก้ (เพื่อความปลอดภัยเบื้องต้น)
             'profile_picture': forms.FileInput(attrs={'class': 'form-control'}),
+        }
+
+class FeedbackForm(forms.ModelForm):
+    class Meta:
+        model = Feedback
+        fields = ['category', 'message', 'rating']
+        widgets = {
+            'category': forms.Select(attrs={'class': 'form-control'}),
+            'message': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'เล่าให้เราฟังหน่อย...'}),
+            'rating': forms.HiddenInput(), # ซ่อนไว้ เดี๋ยวใช้ JS คุมดาว
         }

@@ -124,7 +124,7 @@ body {
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     padding: 2rem;
     max-width: 900px;
-    height: 600px;
+    height: 550px;
     
 }
 .schedule-card h2 {
@@ -362,3 +362,133 @@ body {
     height: 70px;
 }
 /* Delay animation code ... (same as original) */
+
+/* --- Partial Selected State (ลายทาง) --- */
+.time-slot.partial {
+    background-color: #fff;
+    /* สร้างลายทางเฉียง */
+    background-image: repeating-linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.5),
+        rgba(255, 255, 255, 0.5) 10px,
+        var(--slot-color) 10px,
+        var(--slot-color) 20px
+    );
+    border: 2px dashed var(--slot-color);
+    opacity: 0.9;
+}
+
+/* --- Edit Button (Gear Icon) --- */
+.edit-btn {
+    position: absolute;
+    top: -5px; right: -5px;
+    width: 32px; height: 32px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; color: #555;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    opacity: 0; /* ซ่อนไว้ก่อน */
+    transition: all 0.2s;
+    z-index: 5;
+}
+.time-slot:hover .edit-btn { 
+    opacity: 1; 
+    top: -8px; 
+    right: -8px; 
+}
+.edit-btn:hover { 
+    background-color: var(--primary); 
+    color: white; 
+    border-color: var(--primary); 
+}
+
+/* --- Modal Popup --- */
+.modal-overlay {
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5); z-index: 1000;
+    align-items: center; justify-content: center;
+    backdrop-filter: blur(2px);
+}
+.modal-overlay.active { 
+    display: flex; 
+    animation: fadeIn 0.2s; 
+}
+.modal-box {
+    background: white; 
+    width: 320px; 
+    padding: 20px;
+    border-radius: 12px; 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+.modal-header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 10px; 
+}
+.modal-header h3 { 
+    margin: 0; 
+    color: #333; 
+}
+.close-btn { 
+    background: none; 
+    border: none; 
+    font-size: 1.5rem; 
+    cursor: pointer; 
+    color: #999; 
+}
+.hour-grid {
+    display: grid; 
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 10px; 
+    margin-bottom: 20px;
+}
+.hour-item {
+    padding: 10px 5px; 
+    text-align: center; 
+    border: 1px solid #ddd;
+    border-radius: 6px; 
+    cursor: pointer; 
+    font-size: 0.9rem; 
+    color: #555;
+    transition: all 0.2s;
+}
+.hour-item:hover { 
+    background-color: #f0f0f0; 
+}
+.hour-item.selected {
+    background-color: var(--primary); 
+    color: white; 
+    border-color: var(--primary);
+}
+.modal-footer { 
+    display: flex; 
+    justify-content: flex-end; 
+    gap: 10px; 
+}
+.btn-save, .btn-cancel {
+    padding: 8px 16px; 
+    border-radius: 6px; 
+    border: none; 
+    cursor: pointer; 
+    font-weight: 500;
+}
+.btn-save { 
+    background-color: var(--primary); 
+    color: white; 
+}
+.btn-cancel { 
+    background-color: #eee; 
+    color: #333; 
+}
+@keyframes fadeIn {
+    from { opacity: 0; } to { opacity: 1; }
+}
+@media (max-width: 768px) {
+    .main-grid { flex-direction: column; }
+    .schedule-grid { grid-template-columns: repeat(4, 1fr); } /* 4 คอลัมน์บนมือถือ */
+    .legend { display: flex; flex-wrap: wrap; gap: 1rem; width: 100%; }
+    .legend h3 { width: 100%; }
+}

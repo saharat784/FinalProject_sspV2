@@ -7,6 +7,7 @@
     <title>{% block title %}Smart Study Planner{% endblock %}</title>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'core/base.css' %}">
     
     {% block extra_css %}{% endblock %}
     {% block extra_head %}{% endblock %}
@@ -14,5 +15,87 @@
 <body>
     {% block content %}
     {% endblock %}
+    <button class="feedback-btn" onclick="openFeedbackModal()">
+    <i class="fas fa-comment-dots"></i> Feedback
+</button>
+
+<div id="feedbackModal" class="feedback-modal-overlay">
+    <div class="feedback-modal-box">
+        <div class="feedback-header">
+            <h3>ข้อเสนอแนะ / แจ้งปัญหา</h3>
+            <span class="close-feedback" onclick="closeFeedbackModal()">&times;</span>
+        </div>
+        
+        <form action="{% url 'submit_feedback' %}" method="POST">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label>หัวข้อ</label>
+                <select name="category" class="feedback-input" required>
+                    <option value="bug">แจ้งปัญหาการใช้งาน (Bug)</option>
+                    <option value="feature">เสนอแนะฟีเจอร์ใหม่</option>
+                    <option value="content">เนื้อหาผิดพลาด</option>
+                    <option value="other">อื่นๆ</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>รายละเอียด</label>
+                <textarea name="message" class="feedback-input" rows="4" placeholder="บอกเราหน่อยว่าเกิดอะไรขึ้น..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>ความพึงพอใจ</label>
+                <div class="star-rating">
+                    <i class="fas fa-star" data-value="1"></i>
+                    <i class="fas fa-star" data-value="2"></i>
+                    <i class="fas fa-star" data-value="3"></i>
+                    <i class="fas fa-star" data-value="4"></i>
+                    <i class="fas fa-star" data-value="5"></i>
+                </div>
+                <input type="hidden" name="rating" id="ratingInput" value="0">
+            </div>
+
+            <button type="submit" class="feedback-submit-btn">ส่ง</button>
+        </form>
+    </div>
+</div>
+<script>
+    function openFeedbackModal() {
+        document.getElementById('feedbackModal').style.display = 'flex';
+    }
+
+    function closeFeedbackModal() {
+        document.getElementById('feedbackModal').style.display = 'none';
+    }
+
+    // ปิดเมื่อคลิกพื้นหลัง
+    window.addEventListener('click', function(e) {
+        const modal = document.getElementById('feedbackModal');
+        if (e.target === modal) {
+            closeFeedbackModal();
+        }
+    });
+
+    // Star Rating Logic
+    const stars = document.querySelectorAll('.star-rating .fas');
+    const ratingInput = document.getElementById('ratingInput');
+
+    stars.forEach(star => {
+        star.addEventListener('click', function() {
+            const value = this.getAttribute('data-value');
+            ratingInput.value = value;
+            
+            // เปลี่ยนสีดาว
+            stars.forEach(s => {
+                if(s.getAttribute('data-value') <= value) {
+                    s.classList.add('active');
+                } else {
+                    s.classList.remove('active');
+                }
+            });
+        });
+    });
+</script>
 </body>
 </html>

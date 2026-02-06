@@ -5,15 +5,16 @@
 
 {% block extra_head %}
     <link rel="stylesheet" type="text/css" href="{% static 'core/set_schedule.css' %}">
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
 <nav class="navbar">
     <a href="{% url 'add_subject' %}" class="navbar-brand">
-        <i class="fas fa-arrow-left"></i>กำหนดเวลาว่าง
+        <i class="fas fa-arrow-left"></i> ย้อนกลับ
     </a>
 </nav>
+
 <div class="container">
     <div class="progress-indicator">
         <div class="progress-step finished">
@@ -34,53 +35,44 @@
 
     <div class="page-header">
         <h1 class="page-title">กำหนดเวลาว่าง</h1>
-        <p class="page-subtitle">บอกเราว่าคุณว่างเมื่อไหร่ แล้วเราจะช่วยสร้างแผนการเรียนที่ดีที่สุดให้</p>
+        <p class="page-subtitle">คลิกที่กล่องเพื่อเลือกทั้งช่วงเวลา หรือกดที่รูปเฟือง <i class="fas fa-pencil-alt"></i> เพื่อเลือกเฉพาะบางชั่วโมง</p>
     </div>
 
     <div class="schedule-card">
-        <h2>กำหนดเวลาว่าง</h2>
-        <!-- {% if messages %}
-            {% for message in messages %}
-                <div class="alert">{{ message }}</div>
-            {% endfor %}
-        {% endif %} -->
-
         <form method="post" id="schedule-form">
             {% csrf_token %}
             
+            <div id="hidden-inputs-container"></div>
+
             <div class="main-grid">
                 <div class="legend">
                     <h3>ช่วงเวลา</h3>
-
-                    <div class="legend-item" data-slot="morning">
+                    <div class="legend-item">
                         <div class="legend-color" style="background: linear-gradient(135deg, #ff9800, #f57c00);"></div>
                         <div>
                             <div class="legend-text">เช้า</div>
-                            <div class="legend-time">(06:00-12:00)</div>
+                            <div class="legend-time">06:00 - 12:00</div>
                         </div>
                     </div>
-
-                    <div class="legend-item" data-slot="afternoon">
+                    <div class="legend-item">
                         <div class="legend-color" style="background: linear-gradient(135deg, #f44336, #d32f2f);"></div>
                         <div>
                             <div class="legend-text">บ่าย</div>
-                            <div class="legend-time">(13:00-18:00)</div>
+                            <div class="legend-time">12:00 - 17:00</div>
                         </div>
                     </div>
-
-                    <div class="legend-item" data-slot="evening">
+                    <div class="legend-item">
                         <div class="legend-color" style="background: linear-gradient(135deg, #9c27b0, #7b1fa2);"></div>
                         <div>
                             <div class="legend-text">เย็น</div>
-                            <div class="legend-time">(18:00-22:00)</div>
+                            <div class="legend-time">17:00 - 21:00</div>
                         </div>
                     </div>
-
-                    <div class="legend-item" data-slot="night">
+                    <div class="legend-item">
                         <div class="legend-color" style="background: linear-gradient(135deg, #2196f3, #1976d2);"></div>
                         <div>
-                            <div class="legend-text">กลางคืน</div>
-                            <div class="legend-time">(22:00-02:00)</div>
+                            <div class="legend-text">ดึก</div>
+                            <div class="legend-time">21:00 - 06:00</div>
                         </div>
                     </div>
                 </div>
@@ -92,119 +84,212 @@
 
                     {% for slot in time_slots %}
                         {% for day_num, day_name in days.items %}
-
-                            {% with day_str=day_num|stringformat:"s" %}
-                            {% with slot_id=day_str|add:"_"|add:slot.id %}
-
-                            <label class="time-slot {{ slot.class }} {% if slot_id in user_selections %}selected{% endif %}"
-                                   title="{{ day_name }} - {{ slot.label }}">
-
-                                <input type="checkbox" 
-                                       name="slot_{{ day_num }}_{{ slot.id }}" 
-                                       {% if slot_id in user_selections %}checked{% endif %}>
-                            </label>
-                        
-                            {% endwith %}
-                            {% endwith %}
-                        
+                            <div class="time-slot {{ slot.class }}" 
+                                 data-day="{{ day_num }}" 
+                                 data-slot-id="{{ slot.id }}"
+                                 data-slot-label="{{ slot.label }}"
+                                 data-day-name="{{ day_name }}"
+                                 id="block_{{ day_num }}_{{ slot.id }}">
+                                
+                                <span class="edit-btn" onclick="openDetailModal(event, '{{ day_num }}', '{{ slot.id }}', '{{ day_name }}', '{{ slot.label }}')">
+                                    <i class="fas fa-pencil-alt"></i>
+                                </span>
+                            </div>
                         {% endfor %}
                     {% endfor %}
                 </div>
             </div>
-
         </form>
     </div>
+
     <div class="nav-buttons">
         <a href="{% url 'add_subject' %}" class="btn btn-back">ย้อนกลับ</a>
-        <button type="submit" form="schedule-form" class="btn btn-next">ถัดไป</button>
+        <button type="button" onclick="submitForm()" class="btn btn-next">ถัดไป</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="detailModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 id="modalTitle">รายละเอียด</h3>
+            <button type="button" class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <p id="modalSubtitle" class="text-muted" style="margin-bottom: 15px; font-size: 0.9rem; color: #666;">เลือกชั่วโมงที่คุณว่าง</p>
+        
+        <div class="hour-grid" id="modalHourGrid">
+            </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn-cancel" onclick="closeModal()">ยกเลิก</button>
+            <button type="button" class="btn-save" onclick="saveModalSelection()">บันทึก</button>
+        </div>
     </div>
 </div>
 
 <script>
+    // --- 1. เตรียมข้อมูล ---
+    
+    // ดึงข้อมูลเดิมจาก Server (แปลง Django Set -> JS Set)
+    // รูปแบบข้อมูล: "0_6", "0_7", "1_13" (วัน_ชั่วโมง)
+    let selectedHours = new Set({{ selected_hour_keys|safe }});
+    
+    // นิยามช่วงเวลา (ต้องตรงกับ views.py และ time_definitions)
+    const timeDefinitions = {
+        'morning': [6, 7, 8, 9, 10, 11],
+        'afternoon': [12, 13, 14, 15, 16],      // ถึง 16:00 (จบ 17:00)
+        'evening': [17, 18, 19, 20],            // ถึง 20:00 (จบ 21:00)
+        'night': [21, 22, 23, 0, 1, 2, 3, 4, 5] // ยาวไปจนถึงตี 5 (จบ 06:00)
+    };
+
+    // สีสำหรับ CSS Variable (เอาไว้ทำ Partial Striped Background)
+    const slotColors = {
+        'morning': '#ff9800',
+        'afternoon': '#f44336',
+        'evening': '#9c27b0',
+        'night': '#2196f3'
+    };
+
+    // --- 2. การทำงานหลัก ---
+
     document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('schedule-form');
-        const nextBtn = document.querySelector('.btn-next');
-        const scheduleGrid = document.querySelector('.schedule-grid');
+        renderAllBlocks(); // วาดสถานะเริ่มต้น
 
-        let isMouseDown = false;
-        let dragAction = null;
+        // เพิ่ม Event Listener ให้กล่องใหญ่ (คลิกเพื่อเลือกทั้งหมด/เอาออกทั้งหมด)
+        document.querySelectorAll('.time-slot').forEach(slot => {
+            slot.addEventListener('click', function(e) {
+                // ถ้าคลิกโดนปุ่มเฟือง ให้ข้ามไป (เพราะเฟืองมี onclick ของมันเอง)
+                if(e.target.closest('.edit-btn')) return;
 
-        function updateSlotState(slot, shouldBeSelected) {
-            const checkbox = slot.querySelector('input[type="checkbox"]');
-            if (shouldBeSelected) {
-                slot.classList.add('selected');
-            } else {
-                slot.classList.remove('selected');
-            }
-            if (checkbox) checkbox.checked = shouldBeSelected;
-        }
+                const day = this.dataset.day;
+                const slotId = this.dataset.slotId;
+                const hours = timeDefinitions[slotId];
 
-        function updateNextButtonState() {
-            const checkedSlots = form.querySelectorAll('input[type="checkbox"]:checked');
-            // Uncomment บรรทัดล่างถ้าต้องการบังคับให้เลือกอย่างน้อย 1 ช่อง
-            // nextBtn.disabled = checkedSlots.length === 0;
-        }
+                // เช็คว่าในกลุ่มนี้เลือกไว้กี่ชั่วโมง
+                const currentSelectedCount = hours.filter(h => selectedHours.has(`${day}_${h}`)).length;
+                
+                // Logic: ถ้ายังไม่เต็ม -> เลือกให้เต็ม, ถ้าเต็มแล้ว -> ลบออกหมด
+                // (หรือถ้าเลือกบางส่วนอยู่ ก็ให้เลือกให้เต็มก่อน)
+                const shouldSelectAll = currentSelectedCount < hours.length;
 
-        function initializeLegendClick() {
-            document.querySelectorAll('.legend-item').forEach(item => {
-                item.style.cursor = 'pointer';
-                item.addEventListener('click', function() {
-                    const slotType = this.dataset.slot;
-                    const targetSlots = document.querySelectorAll(`.time-slot.${slotType}`);
-                    
-                    // เช็คว่าในแถวนั้นถูกเลือกครบหรือยัง
-                    const allSelected = Array.from(targetSlots).every(slot => slot.classList.contains('selected'));
-                    const shouldSelect = !allSelected; // ถ้าครบแล้วให้ยกเลิก, ถ้ายังให้เลือกทั้งหมด
-
-                    targetSlots.forEach(slot => updateSlotState(slot, shouldSelect));
-                    updateNextButtonState();
+                hours.forEach(h => {
+                    const key = `${day}_${h}`;
+                    if(shouldSelectAll) selectedHours.add(key);
+                    else selectedHours.delete(key);
                 });
+
+                renderBlockState(day, slotId); // อัปเดตสีกระพริบแค่กล่องนี้
             });
-        }
-
-        function initializeScheduleGrid() {
-            scheduleGrid.addEventListener('selectstart', e => e.preventDefault());
-
-            document.querySelectorAll('.time-slot').forEach(slot => {
-                slot.setAttribute('tabindex', '0');
-                slot.addEventListener('mousedown', function(e) {
-                    e.preventDefault();
-                    isMouseDown = true;
-                    const isCurrentlySelected = this.classList.contains('selected');
-                    dragAction = isCurrentlySelected ? 'deselect' : 'select';
-
-                    updateSlotState(this, !isCurrentlySelected);
-                });
-
-                slot.addEventListener('mouseover', function() {
-                    if (isMouseDown) { 
-                        const shouldSelect = (dragAction === 'select');
-                        updateSlotState(this, shouldSelect);
-                    }
-                });
-
-                slot.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        updateSlotState(this, !this.classList.contains('selected'));
-                        updateNextButtonState();
-                    }
-                });
-            });
-
-            window.addEventListener('mouseup', function() {
-                if (isMouseDown) {
-                    isMouseDown = false;
-                    dragAction = null;
-                    updateNextButtonState();
-                }
-            });
-        }
-
-        initializeScheduleGrid();
-        initializeLegendClick();
-        form.addEventListener('change', updateNextButtonState);
-        updateNextButtonState();
+        });
     });
+
+    // --- 3. ฟังก์ชันจัดการหน้าจอ (UI) ---
+
+    // วาดสถานะของกล่อง (Full, Partial, None)
+    function renderBlockState(day, slotId) {
+        const block = document.getElementById(`block_${day}_${slotId}`);
+        const hours = timeDefinitions[slotId];
+        // นับจำนวนชั่วโมงที่ถูกเลือกในกล่องนี้
+        const selectedCount = hours.filter(h => selectedHours.has(`${day}_${h}`)).length;
+
+        // Reset classes
+        block.classList.remove('selected', 'partial');
+        block.style.removeProperty('--slot-color');
+
+        if (selectedCount === hours.length) {
+            // กรณีเลือกครบทุกชั่วโมง (Full)
+            block.classList.add('selected');
+        } else if (selectedCount > 0) {
+            // กรณีเลือกบางชั่วโมง (Partial)
+            block.classList.add('partial');
+            // ตั้งค่าสีสำหรับทำลายเส้น (Striped)
+            block.style.setProperty('--slot-color', slotColors[slotId]);
+        }
+    }
+
+    function renderAllBlocks() {
+        document.querySelectorAll('.time-slot').forEach(slot => {
+            renderBlockState(slot.dataset.day, slot.dataset.slotId);
+        });
+    }
+
+    // --- 4. Modal Logic (หน้าต่างเลือกรายชั่วโมง) ---
+    
+    let currentModalDay = null;
+    let currentModalSlotId = null;
+
+    // เปิด Modal
+    window.openDetailModal = function(e, day, slotId, dayName, slotLabel) {
+        e.stopPropagation(); // ห้าม event ทะลุไปโดนกล่องใหญ่
+        currentModalDay = day;
+        currentModalSlotId = slotId;
+
+        document.getElementById('modalTitle').innerText = `${dayName} - ${slotLabel}`;
+        const grid = document.getElementById('modalHourGrid');
+        grid.innerHTML = ''; // ล้างปุ่มเก่า
+
+        const hours = timeDefinitions[slotId];
+        hours.forEach(h => {
+            const btn = document.createElement('div');
+            btn.className = 'hour-item';
+            // จัด format เวลา เช่น 6:00 - 7:00
+            btn.innerText = `${h.toString().padStart(2, '0')}:00`;
+            
+            // เช็คว่าชั่วโมงนี้เลือกอยู่ไหม
+            if (selectedHours.has(`${day}_${h}`)) {
+                btn.classList.add('selected');
+            }
+            
+            // กดปุ่มชั่วโมงใน Modal
+            btn.onclick = function() {
+                this.classList.toggle('selected');
+            };
+            grid.appendChild(btn);
+        });
+
+        document.getElementById('detailModal').classList.add('active');
+    }
+
+    window.closeModal = function() {
+        document.getElementById('detailModal').classList.remove('active');
+    }
+
+    // กดปุ่มบันทึกใน Modal
+    window.saveModalSelection = function() {
+        const grid = document.getElementById('modalHourGrid');
+        const buttons = grid.getElementsByClassName('hour-item');
+        const hours = timeDefinitions[currentModalSlotId];
+
+        Array.from(buttons).forEach((btn, index) => {
+            const h = hours[index];
+            const key = `${currentModalDay}_${h}`;
+            if (btn.classList.contains('selected')) {
+                selectedHours.add(key);
+            } else {
+                selectedHours.delete(key);
+            }
+        });
+
+        renderBlockState(currentModalDay, currentModalSlotId); // อัปเดตหน้าหลัก
+        closeModal();
+    }
+
+    // --- 5. Submit Form ---
+
+    window.submitForm = function() {
+        const container = document.getElementById('hidden-inputs-container');
+        container.innerHTML = ''; // ล้าง input เก่า
+        
+        // สร้าง <input type="hidden"> สำหรับแต่ละชั่วโมงที่เลือก
+        selectedHours.forEach(key => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = `hour_${key}`; // ชื่อเช่น hour_0_6
+            input.value = '1';
+            container.appendChild(input);
+        });
+
+        // ส่งฟอร์ม
+        document.getElementById('schedule-form').submit();
+    }
 </script>
 {% endblock %}

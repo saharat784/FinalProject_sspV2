@@ -37,4 +37,8 @@ urlpatterns = [
     path('google/login/', views.google_auth_start, name='google_auth_start'),
     path('google/callback/', views.google_auth_callback, name='google_auth_callback'),
     path('sync-calendar/', views.sync_calendar_view, name='sync_calendar'),
+    # Notification URL
+    path('notification/read/<uuid:notification_id>/', views.mark_notification_as_read, name='mark_notification_read'),
+    # Feedback URL
+    path('submit-feedback/', views.submit_feedback_view, name='submit_feedback'),
 ]

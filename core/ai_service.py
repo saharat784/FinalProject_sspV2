@@ -36,7 +36,10 @@ def generate_study_schedule(user, user_settings):
     availability_data = []
     if availability.exists():
         for slot in availability:
-            availability_data.append(f"{slot.get_day_of_week_display()} - {slot.get_time_slot_display()}")
+            # availability_data.append(f"{slot.get_day_of_week_display()} - {slot.get_time_slot_display()}")
+            start_time = f"{slot.hour:02d}:00"
+            end_time = f"{(slot.hour + 1) % 24:02d}:00"
+            availability_data.append(f"{slot.get_day_of_week_display()}: {start_time} - {end_time}")
         availability_prompt = f"User's available slots: {availability_data}"
     else:
         availability_prompt = "The user has NOT provided specific availability. Please create a balanced schedule."

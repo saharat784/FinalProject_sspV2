@@ -49,10 +49,10 @@
                 </div>
                 <ul class="popup-menu">
                     <li><a href="{% url 'edit_profile' %}">แก้ไขโปรไฟล์</a></li>
-                    <li><a href="#">ความคืบหน้า</a></li>
-                    <li><a href="#">สร้างแผนใหม่</a></li>
+                    <!-- <li><a href="#">ความคืบหน้า</a></li> -->
+                    <li><a href="{% url 'add_subject' %}">เพิ่มวิชา และสร้างแผนการอ่าน</a></li>
                     <li><a href="{% url 'summary_history' %}">สมุดบันทึกสรุป</a></li>
-                    <li><a href="#">การแจ้งเตือน</a></li>
+                    <!-- <li><a href="#">การแจ้งเตือน</a></li> -->
                     <li>
                         <form action="{% url 'logout' %}" method="post">
                             {% csrf_token %}
@@ -60,6 +60,31 @@
                         </form>
                     </li>
                 </ul>
+            </div>
+        </div>
+        <!-- Notification Section -->
+        <div class="notification-dropdown">
+            <a href="#" id="notifDropdownBtn" class="notif-toggle">
+                <i class="fas fa-bell"></i>
+                {% if unread_count > 0 %}
+                    <span class="notif-badge">{{ unread_count }}</span>
+                {% endif %}
+            </a>
+        
+            <div class="notif-content" id="notifContent">
+                <div class="notif-header">การแจ้งเตือน</div>
+            
+                <div class="notif-list">
+                    {% for notif in notifications %}
+                        <a href="{% url 'mark_notification_read' notif.notification_id %}" 
+                           class="notif-item {% if not notif.is_read %}unread{% endif %}">
+                            <div class="notif-message">{{ notif.message }}</div>
+                            <div class="notif-time">{{ notif.created_at|timesince }} ที่แล้ว</div>
+                        </a>
+                    {% empty %}
+                        <div class="notif-empty">ไม่มีการแจ้งเตือน</div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </nav>
@@ -452,6 +477,25 @@
                 window.location.href = "{% url 'sync_calendar' %}";
             }, 500); // 0.5 วินาที
         }
+
+        document.getElementById('notifDropdownBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            const content = document.getElementById('notifContent');
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+            } else {
+                content.style.display = 'none';
+            }
+        });
+
+        // คลิกที่อื่นเพื่อปิด
+        document.addEventListener('click', function(e) {
+            const btn = document.getElementById('notifDropdownBtn');
+            const content = document.getElementById('notifContent');
+            if (!btn.contains(e.target) && !content.contains(e.target)) {
+                content.style.display = 'none';
+            }
+        });
     </script>
 
 

@@ -81,6 +81,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.notifications',
             ],
         },
     },
@@ -184,7 +185,7 @@ LOGIN_REDIRECT_URL = 'home_page'
 # }
 
 if 'RENDER' in os.environ:
-    print("--- 🟢 Using Cloudinary for BOTH Media & Static ---")
+    print("--- Using Cloudinary for BOTH Media & Static ---")
 
     STORAGES = {
         "default": {
@@ -197,7 +198,7 @@ if 'RENDER' in os.environ:
         },
     }
 else:
-    print("--- 🏠 Using Local File Storage ---")
+    print("--- Using Local File Storage ---")
 
     STORAGES = {
         "default": {
@@ -210,6 +211,6 @@ else:
 
     MEDIA_URL = '/media/'
     MEDIA_ROOT = BASE_DIR / 'media'
-    
+
 # บอก Django ว่าถ้ามีการอัปโหลดไฟล์ (Media) ให้ไปเก็บที่ Cloudinary
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'

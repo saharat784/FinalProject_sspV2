@@ -23,8 +23,8 @@ from django.conf import settings
 from core.google_calendar import delete_event_from_google, exchange_code_for_token, get_auth_url, sync_sessions_to_google
 from smart_study_planner import settings
 
-from .forms import CustomUserCreationForm, CustomAuthenticationForm, SubjectForm, UserSettingsForm, UserUpdateForm
-from .models import CustomUser, File, QuizResult, StudySummary, Subject, UserAvailability, UserSettings, StudySession
+from .forms import CustomUserCreationForm, CustomAuthenticationForm, FeedbackForm, SubjectForm, UserSettingsForm, UserUpdateForm
+from .models import CustomUser, File, Notification, QuizResult, StudySummary, Subject, UserAvailability, UserSettings, StudySession
 from .ai_service import generate_content_summary, generate_quiz_questions, generate_study_schedule
 
 # ตั้งค่า Path (ใช้ตัวเดียวกับที่มีอยู่)
@@ -201,7 +201,7 @@ def homepage_view(request):
     )
 
     # สร้างตาราง Grid (Time Slots) ตั้งแต่ 06:00 - 23:00 (ปรับช่วงเวลาได้ตามต้องการ)
-    hours_range = range(6, 24) # 6 โมงเช้า ถึง เที่ยงคืน
+    hours_range = range(1, 24) # 6 โมงเช้า ถึง เที่ยงคืน
     calendar_grid = []
 
     for hour in hours_range:
@@ -347,44 +347,118 @@ def delete_file_view(request, file_id):
     messages.success(request, 'ลบไฟล์เรียบร้อยแล้ว')
     return redirect('add_subject')
 
+# @login_required
+# def set_schedule_view(request):
+#     existing_slots = UserAvailability.objects.filter(user=request.user)
+#     selected_slots = set(f"{slot.day_of_week}_{slot.time_slot}" for slot in existing_slots)
+
+#     days_of_week = {
+#         0: 'จันทร์', 1: 'อังคาร', 2: 'พุธ',
+#         3: 'พฤหัสบดี', 4: 'ศุกร์', 5: 'เสาร์', 6: 'อาทิตย์'
+#     }
+    
+#     # แก้ไขให้เป็น List of Dict เพื่อให้ Template ใช้งานได้ง่าย ({{ slot.id }}, {{ slot.class }})
+#     time_slots_data = [
+#         {'id': 'morning', 'class': 'morning', 'label': 'ช่วงเช้า (06:00-12:00)'},
+#         {'id': 'afternoon', 'class': 'afternoon', 'label': 'ช่วงบ่าย (13:00-18:00)'},
+#         {'id': 'evening', 'class': 'evening', 'label': 'ช่วงเย็น (18:00-22:00)'},
+#         {'id': 'night', 'class': 'night', 'label': 'ช่วงดึก (22:00-02:00)'},
+#     ]
+
+#     if request.method == 'POST':
+#         new_selections_keys = [key for key in request.POST.keys() if key.startswith('slot_')]
+        
+#         UserAvailability.objects.filter(user=request.user).delete()
+#         slots_to_create = []
+#         for key in new_selections_keys:
+#             parts = key.split('_')
+#             # ป้องกัน Error ถ้า split แล้วได้ค่าไม่ครบ
+#             if len(parts) == 3:
+#                 _, day, slot = parts
+#                 slots_to_create.append(
+#                     UserAvailability(user=request.user, day_of_week=int(day), time_slot=slot)
+#                 )
+#         UserAvailability.objects.bulk_create(slots_to_create)
+#         return redirect('study_settings')
+
+#     context = {
+#         'user_selections': selected_slots,
+#         'days': days_of_week, 
+#         'time_slots': time_slots_data, 
+#     }
+#     return render(request, 'core/set_schedule.html', context)
+
 @login_required
 def set_schedule_view(request):
-    existing_slots = UserAvailability.objects.filter(user=request.user)
-    selected_slots = set(f"{slot.day_of_week}_{slot.time_slot}" for slot in existing_slots)
-
     days_of_week = {
         0: 'จันทร์', 1: 'อังคาร', 2: 'พุธ',
         3: 'พฤหัสบดี', 4: 'ศุกร์', 5: 'เสาร์', 6: 'อาทิตย์'
     }
-    
-    # แก้ไขให้เป็น List of Dict เพื่อให้ Template ใช้งานได้ง่าย ({{ slot.id }}, {{ slot.class }})
-    time_slots_data = [
-        {'id': 'morning', 'class': 'morning', 'label': 'ช่วงเช้า (06:00-12:00)'},
-        {'id': 'afternoon', 'class': 'afternoon', 'label': 'ช่วงบ่าย (13:00-18:00)'},
-        {'id': 'evening', 'class': 'evening', 'label': 'ช่วงเย็น (18:00-22:00)'},
-        {'id': 'night', 'class': 'night', 'label': 'ช่วงดึก (22:00-02:00)'},
-    ]
+
+    # นิยามช่วงเวลาว่าชั่วโมงไหนอยู่กล่องไหน
+    time_definitions = {
+        'morning': list(range(6, 12)),    # 06, 07, ..., 11 (6 ชั่วโมง)
+        'afternoon': list(range(12, 17)), # 12, ..., 16 (5 ชั่วโมง) *แก้จาก 18 เป็น 17
+        'evening': list(range(17, 21)),   # 17, ..., 20 (4 ชั่วโมง) *เริ่มเร็วขึ้น จบเร็วขึ้น
+        # ช่วงดึก: 21:00 ถึง 23:00 และ 00:00 ถึง 05:00
+        'night': list(range(21, 24)) + list(range(0, 6)) 
+    }
 
     if request.method == 'POST':
-        new_selections_keys = [key for key in request.POST.keys() if key.startswith('slot_')]
-        
+        # ลบของเก่าทิ้งก่อน
         UserAvailability.objects.filter(user=request.user).delete()
+        
         slots_to_create = []
-        for key in new_selections_keys:
-            parts = key.split('_')
-            # ป้องกัน Error ถ้า split แล้วได้ค่าไม่ครบ
-            if len(parts) == 3:
-                _, day, slot = parts
+        # รับค่าแบบ hour_0_6 (day 0, hour 6)
+        for key in request.POST:
+            if key.startswith('hour_'):
+                _, day, hour = key.split('_')
                 slots_to_create.append(
-                    UserAvailability(user=request.user, day_of_week=int(day), time_slot=slot)
+                    UserAvailability(user=request.user, day_of_week=int(day), hour=int(hour))
                 )
         UserAvailability.objects.bulk_create(slots_to_create)
         return redirect('study_settings')
 
+    # ดึงข้อมูลชั่วโมงที่ว่างจริงออกมา
+    existing_hours = UserAvailability.objects.filter(user=request.user)
+    # สร้าง set เก็บว่า (วัน, ชั่วโมง) ไหนบ้างที่มีข้อมูล
+    # รูปแบบ: "0_6" หมายถึง วันจันทร์ 6 โมง
+    selected_hour_keys = set(f"{slot.day_of_week}_{slot.hour}" for slot in existing_hours)
+
+    # เตรียมข้อมูลเพื่อส่งไปหน้าเว็บ (UI Blocks)
+    # เราต้องบอกหน้าเว็บว่า กล่องนี้ถูกเลือก "Full", "Partial", หรือ "None"
+    ui_blocks_state = {} 
+    
+    for day_num in days_of_week.keys():
+        for slot_name, hours in time_definitions.items():
+            # เช็คว่าในชั่วโมงของช่วงนี้ ถูกเลือกกี่ชั่วโมง
+            selected_count = sum(1 for h in hours if f"{day_num}_{h}" in selected_hour_keys)
+            total_count = len(hours)
+            
+            state = 'none'
+            if selected_count == total_count:
+                state = 'full'
+            elif selected_count > 0:
+                state = 'partial'
+                
+            ui_blocks_state[f"{day_num}_{slot_name}"] = {
+                'state': state,
+                'selected_hours': [h for h in hours if f"{day_num}_{h}" in selected_hour_keys]
+            }
+
+    # ข้อมูลสำหรับ Modal (ให้ loop สร้าง checkbox)
+    time_slots_data = [
+        {'id': 'morning', 'class': 'morning', 'label': 'ช่วงเช้า', 'hours': time_definitions['morning']},
+        {'id': 'afternoon', 'class': 'afternoon', 'label': 'ช่วงบ่าย', 'hours': time_definitions['afternoon']},
+        {'id': 'evening', 'class': 'evening', 'label': 'ช่วงเย็น', 'hours': time_definitions['evening']},
+        {'id': 'night', 'class': 'night', 'label': 'ช่วงดึก', 'hours': time_definitions['night']},
+    ]
+
     context = {
-        'user_selections': selected_slots,
         'days': days_of_week, 
-        'time_slots': time_slots_data, 
+        'time_slots': time_slots_data,
+        'ui_blocks_state': ui_blocks_state, # เอาไว้ render สีกล่อง
+        'selected_hour_keys': list(selected_hour_keys), # เอาไว้ check ใน modal
     }
     return render(request, 'core/set_schedule.html', context)
 
@@ -702,3 +776,28 @@ def logout_view(request):
     logout(request)
     return redirect('login')
 
+@login_required
+def mark_notification_as_read(request, notification_id):
+    notification = get_object_or_404(Notification, notification_id=notification_id, recipient=request.user)
+    notification.is_read = True
+    notification.save()
+    
+    # ถ้ามีลิงก์ ให้เด้งไปที่ลิงก์นั้น ถ้าไม่มี ให้เด้งกลับหน้าเดิม
+    if notification.link:
+        return redirect(notification.link)
+    return redirect(request.META.get('HTTP_REFERER', 'home_page'))
+
+@login_required
+def submit_feedback_view(request):
+    if request.method == 'POST':
+        form = FeedbackForm(request.POST)
+        if form.is_valid():
+            feedback = form.save(commit=False)
+            feedback.user = request.user
+            feedback.save()
+            messages.success(request, "ขอบคุณสำหรับข้อเสนอแนะ! เราได้รับข้อมูลแล้วครับ")
+        else:
+            messages.error(request, "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง")
+            
+    # ส่งกลับไปหน้าเดิมไม่ว่าจะสำเร็จหรือไม่
+    return redirect(request.META.get('HTTP_REFERER', 'home_page'))

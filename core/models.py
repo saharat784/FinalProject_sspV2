@@ -135,22 +135,28 @@ class UserAvailability(models.Model):
         (0, 'Monday'), (1, 'Tuesday'), (2, 'Wednesday'),
         (3, 'Thursday'), (4, 'Friday'), (5, 'Saturday'), (6, 'Sunday')
     ]
-    TIMESLOT_CHOICES = [
-        ('morning', '06:00-12:00'),
-        ('afternoon', '13:00-18:00'),
-        ('evening', '18:00-22:00'),
-        ('night', '22:00-02:00'),
-    ]
+    # TIMESLOT_CHOICES = [
+    #     ('morning', '06:00-12:00'),
+    #     ('afternoon', '13:00-18:00'),
+    #     ('evening', '18:00-22:00'),
+    #     ('night', '22:00-02:00'),
+    # ]
     availability_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     day_of_week = models.IntegerField(choices=DAY_CHOICES)
-    time_slot = models.CharField(max_length=10, choices=TIMESLOT_CHOICES)
+    # time_slot = models.CharField(max_length=10, choices=TIMESLOT_CHOICES)
+
+    # ✅ เปลี่ยนจาก time_slot (Char) เป็น hour (Int)
+    # เช่น 6 = 06:00-07:00, 13 = 13:00-14:00
+    hour = models.IntegerField()
 
     class Meta:
-        unique_together = ('user', 'day_of_week', 'time_slot')
+        # unique_together = ('user', 'day_of_week', 'time_slot')
+        unique_together = ('user', 'day_of_week', 'hour')
 
     def __str__(self):
-        return f"{self.user.username} - {self.get_day_of_week_display()} - {self.time_slot}"
+        # return f"{self.user.username} - {self.get_day_of_week_display()} - {self.time_slot}"
+        return f"{self.user.username} - {self.get_day_of_week_display()} @ {self.hour}:00"
     
 # ตารางเซสชันการเรียน (StudySessions)
 class StudySession(models.Model):
@@ -205,3 +211,48 @@ class QuizResult(models.Model):
     class Meta:
         db_table = 'quiz_results'
         ordering = ['-created_at']
+
+# ตารางการแจ้งเตือน (Notifications)
+class Notification(models.Model):
+    TYPE_CHOICES = [
+        ('info', 'Information'),
+        ('success', 'Success'),
+        ('warning', 'Warning'),
+        ('error', 'Error'),
+    ]
+
+    notification_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    recipient = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='notifications')
+    message = models.CharField(max_length=255)
+    link = models.CharField(max_length=255, blank=True, null=True) # กดแล้วไปไหน (เช่น /schedule/)
+    is_read = models.BooleanField(default=False)
+    notification_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='info')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at'] # ใหม่สุดขึ้นก่อน
+
+    def __str__(self):
+        return f"Notification for {self.recipient.username}: {self.message}"
+
+# ตารางข้อเสนอแนะจากผู้ใช้ (Feedback)  
+class Feedback(models.Model):
+    CATEGORY_CHOICES = [
+        ('bug', 'แจ้งปัญหาการใช้งาน (Bug)'),
+        ('feature', 'เสนอแนะฟีเจอร์ใหม่ (Feature Request)'),
+        ('content', 'เนื้อหาผิดพลาด (Content Issue)'),
+        ('other', 'อื่นๆ (Other)'),
+    ]
+
+    feedback_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='other')
+    message = models.TextField(verbose_name="รายละเอียด")
+    rating = models.IntegerField(default=0, blank=True, null=True) # ให้ดาว 1-5 (ถ้ามี)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.get_category_display()} by {self.user.username}"

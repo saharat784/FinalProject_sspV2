@@ -1,0 +1,109 @@
+.body{
+    font-family: 'Kanit', sans-serif;
+    margin: 0;
+}
+/* ปุ่มลอย */
+.feedback-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background-color: #888888; /* สีหลักของเว็บ */
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-size: 1rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    cursor: pointer;
+    z-index: 1000;
+    transition: transform 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.feedback-btn:hover {
+    transform: scale(1.05);
+    background-color: #2554D1;
+}
+/* Modal Overlay */
+.feedback-modal-overlay {
+    display: none; /* ซ่อนก่อน */
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(2px);
+}
+/* Modal Box */
+.feedback-modal-box {
+    background: white;
+    width: 90%;
+    max-width: 400px;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    animation: slideUp 0.3s ease;
+}
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+.feedback-header {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 20px;
+}
+.feedback-header h3 { 
+    margin: 0; 
+    font-size: 1.2rem; 
+    color: #333; 
+}
+.close-feedback { 
+    font-size: 2.5rem; 
+    cursor: pointer; 
+    color: #999; 
+}
+
+.form-group { 
+    margin-bottom: 15px; 
+}
+.form-group label { display: block; 
+    margin-bottom: 5px; 
+    font-weight: 500; 
+    color: #555; 
+}
+.feedback-input {
+    width: 100%; 
+    padding: 10px; 
+    border: 2px solid #ddd; 
+    border-radius: 12px;
+    box-sizing: border-box; 
+    font-family: inherit;
+}
+.feedback-submit-btn {
+    width: 100%; 
+    padding: 12px; 
+    background: #336BF9; 
+    color: white;
+    border: none; 
+    border-radius: 12px; 
+    font-weight: 600;
+    font-size: 1.25rem; 
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.feedback-submit-btn:hover { 
+    background: #2554D1; 
+}
+/* Star Rating */
+.star-rating { color: #ddd; 
+    font-size: 1.5rem; 
+    cursor: pointer; 
+}
+.star-rating .fas.active { 
+    color: #FFD700; 
+}
