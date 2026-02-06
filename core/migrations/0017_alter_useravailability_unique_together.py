@@ -15,3 +15,38 @@ class Migration(migrations.Migration):
             unique_together={('user', 'day_of_week', 'hour')},
         ),
     ]
+
+# ✅ ฟังก์ชันสำหรับลบเฉพาะตัวที่ซ้ำ
+def remove_duplicates(apps, schema_editor):
+    UserAvailability = apps.get_model('core', 'UserAvailability')
+    
+    # ดึงข้อมูลทั้งหมดมาเช็ค
+    for row in UserAvailability.objects.all():
+        # หาว่ามีแถวอื่นที่ข้อมูลเหมือนกันเป๊ะๆ ไหม (User เดียวกัน, วันเดียวกัน, ชั่วโมงเดียวกัน)
+        # แต่ ID ไม่ใช่ตัวมันเอง (.exclude)
+        duplicates = UserAvailability.objects.filter(
+            user=row.user,
+            day_of_week=row.day_of_week,
+            hour=row.hour
+        ).exclude(availability_id=row.availability_id)
+        
+        # ถ้าเจอตัวซ้ำ ให้ลบทิ้งให้หมด (เหลือตัวต้นฉบับไว้ row เดียว)
+        if duplicates.exists():
+            duplicates.delete()
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        ('core', '0016_alter_useravailability_unique_together_and_more'), # เช็คชื่อไฟล์ 0016 ให้ตรงกับในเครื่องคุณนะครับ
+    ]
+
+    operations = [
+        # 1. รันคำสั่งลบตัวซ้ำก่อน
+        migrations.RunPython(remove_duplicates),
+
+        # 2. พอข้อมูลสะอาดแล้ว ค่อยสั่งสร้างกฎห้ามซ้ำ
+        migrations.AlterUniqueTogether(
+            name='useravailability',
+            unique_together={('user', 'day_of_week', 'hour')},
+        ),
+    ]
