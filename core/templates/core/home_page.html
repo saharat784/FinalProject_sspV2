@@ -143,6 +143,10 @@
                 </div>
             </div>
 
+            <a href="{% url 'add_subject' %}" class="btn-add-floating">
+                <span class="plus-icon"></span> เพิ่ม/แก้ไขวิชา
+            </a>
+
             <!-- Calendar Table -->
             <div class="calendar-wrapper">
                 <table class="calendar-table">
@@ -184,9 +188,6 @@
                 </table>
             </div>
 
-            <a href="{% url 'add_subject' %}" class="btn-add-floating">
-                <span class="plus-icon"></span> เพิ่ม/แก้ไขวิชา
-            </a>
             
             {% if not calendar_grid %}
                <div class="empty-state">ไม่พบข้อมูลตารางเรียน</div>

@@ -388,12 +388,13 @@ body {
     bottom: 20px;
     left: 50%;
     margin-top: 10px;
+    margin-bottom: 10px;
     background: linear-gradient(135deg, #336BF9, #9951FF);
     color: white;
     padding: 15px 25px;
     border-radius: 12px;
     font-weight: 600;
-    box-shadow: 0 4px 20px rgba(51, 107, 249, 0.4);
+    /* box-shadow: 0 4px 20px rgba(51, 107, 249, 0.4); */
     text-decoration: none;
     display: flex;
     align-items: center;
@@ -404,7 +405,7 @@ body {
 } 
 .btn-add-floating:hover { 
     transform: translateY(-3px); 
-    box-shadow: 0 6px 25px rgba(51, 107, 249, 0.5); 
+    /* box-shadow: 0 6px 25px rgba(51, 107, 249, 0.5);  */
 }
 
 /* CALENDAR STYLES */

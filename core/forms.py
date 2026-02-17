@@ -5,14 +5,17 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .models import CustomUser, Feedback, Subject, UserSettings
 
+# สร้าง Widget ใหม่สำหรับอัปโหลดหลายไฟล์
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
 
+#ฟอร์มสร้างผู้ใช้ใหม่
 class CustomUserCreationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = CustomUser
         fields = UserCreationForm.Meta.fields + ('email',)
 
+# ฟอร์มล็อกอิน ปรับแต่งให้สวยงามขึ้น
 class CustomAuthenticationForm(AuthenticationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -23,6 +26,7 @@ class CustomAuthenticationForm(AuthenticationForm):
             {'class': 'form-control', 'placeholder': 'Password'}
         )
 
+# ฟอร์มจัดการวิชา
 class SubjectForm(forms.ModelForm):
     # ใช้ Widget ที่สร้างใหม่
     file = forms.FileField(
@@ -62,6 +66,7 @@ class SubjectForm(forms.ModelForm):
 
         return file
 
+# ฟอร์มตั้งค่าผู้ใช้
 class UserSettingsForm(forms.ModelForm):
     class Meta:
         model = UserSettings
@@ -79,6 +84,7 @@ class UserSettingsForm(forms.ModelForm):
             'academic_goal': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'เช่น อยากได้เกรด 3.50 ขึ้นไป'}),
         }
         
+# ฟอร์มอัปเดตข้อมูลผู้ใช้
 class UserUpdateForm(forms.ModelForm):
     class Meta:
         model = CustomUser
@@ -90,6 +96,7 @@ class UserUpdateForm(forms.ModelForm):
             'profile_picture': forms.FileInput(attrs={'class': 'form-control'}),
         }
 
+# ฟอร์มส่งความคิดเห็น
 class FeedbackForm(forms.ModelForm):
     class Meta:
         model = Feedback

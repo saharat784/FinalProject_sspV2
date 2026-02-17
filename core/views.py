@@ -546,6 +546,7 @@ def finished_studying_view(request, session_id):
     }
     return render(request, 'core/finished_studying.html', context)
 
+# API สำหรับให้ AI สรุปเนื้อหาและบันทึกลง DB (ใช้คู่กับ Popup Loading)
 @login_required
 def get_session_summary(request, session_id):
     """
