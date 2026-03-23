@@ -27,18 +27,17 @@ from .forms import CustomUserCreationForm, CustomAuthenticationForm, FeedbackFor
 from .models import CustomUser, File, Notification, QuizResult, StudySummary, Subject, UserAvailability, UserSettings, StudySession
 from .ai_service import generate_content_summary, generate_quiz_questions, generate_study_schedule
 
-# ตั้งค่า Path (ใช้ตัวเดียวกับที่มีอยู่)
+# ตั้งค่า Path ของไฟล์ client_secret.json สำหรับ Google OAuth
 # CLIENT_SECRETS_FILE = os.path.join(settings.BASE_DIR, "client_secret.json")
 
-# ✅ ใช้อันใหม่นี้แทน:
-# ถ้ามีไฟล์ใน /etc/secrets/ (บน Render) ให้ใช้
+# ถ้ามีไฟล์ใน /etc/secrets/ บน Render ให้ใช้
 if os.path.exists('/etc/secrets/client_secret.json'):
     CLIENT_SECRETS_FILE = '/etc/secrets/client_secret.json'
 else:
     # ถ้าไม่มี (ในเครื่องเรา) ให้ใช้ที่เดิม
     CLIENT_SECRETS_FILE = os.path.join(settings.BASE_DIR, "client_secret.json")
 
-# Scopes สำหรับ Login (ขอแค่ข้อมูลพื้นฐาน)
+# Scopes สำหรับ Login
 LOGIN_SCOPES = [
     'openid',
     'https://www.googleapis.com/auth/userinfo.email',
@@ -85,7 +84,7 @@ def google_login_callback(request):
         flow.fetch_token(authorization_response=request.build_absolute_uri())
         credentials = flow.credentials
         
-        # แกะข้อมูลผู้ใช้จาก ID Token (JWT)
+        # ดึงข้อมูลผู้ใช้จาก ID Token (JWT)
         id_info = id_token.verify_oauth2_token(
             credentials.id_token,
             google_requests.Request(),
@@ -98,12 +97,12 @@ def google_login_callback(request):
         
         # --- Logic การ Login/Register ---
         if email:
-            # 1. เช็คว่ามี User นี้ในระบบไหม?
+            # 1. เช็คว่ามี User นี้ในระบบไหม
             try:
                 user = CustomUser.objects.get(email=email)
             except CustomUser.DoesNotExist:
-                # 2. ถ้าไม่มี -> สร้าง User ใหม่ (Register)
-                # สร้าง username จาก email (ตัด @...)
+                # 2. ถ้าไม่มี -> สร้าง User ใหม่
+                # สร้าง username จาก email
                 username = email.split('@')[0]
                 
                 # ตรวจสอบว่า username ซ้ำไหม ถ้าซ้ำให้เติมตัวเลข
@@ -119,7 +118,7 @@ def google_login_callback(request):
                     first_name=first_name,
                     last_name=last_name
                 )
-                # เนื่องจาก Login ผ่าน Google จึงไม่มี password เราปล่อยไว้ได้ หรือ set unusable
+                # ตั้งรหัสผ่านให้ไม่สามารถใช้ได้ เฉพาะ Login ด้วย Google
                 user.set_unusable_password()
                 user.save()
             
@@ -187,7 +186,7 @@ def homepage_view(request):
     start_of_week = current_date - timedelta(days=int(current_date.strftime("%w")))
     end_of_week = start_of_week + timedelta(days=6)
 
-    # สร้าง List วันที่ในสัปดาห์ (อาทิตย์ - เสาร์) เพื่อใช้ทำหัวตาราง
+    # สร้าง List วันที่ในสัปดาห์ เพื่อใช้ทำหัวตาราง
     week_dates = []
     for i in range(7):
         day = start_of_week + timedelta(days=i)
@@ -200,7 +199,7 @@ def homepage_view(request):
         start_time__date__lte=end_of_week
     )
 
-    # สร้างตาราง Grid (Time Slots) ตั้งแต่ 06:00 - 23:00 (ปรับช่วงเวลาได้ตามต้องการ)
+    # สร้างตาราง Grid Time Slots ตั้งแต่ 06:00 - 00:00
     hours_range = range(1, 24) # 6 โมงเช้า ถึง เที่ยงคืน
     calendar_grid = []
 
@@ -208,7 +207,6 @@ def homepage_view(request):
         row = {'hour': f"{hour:02d}:00", 'days': []}
         for day in week_dates:
             # หาวิชาที่เรียนในวันนั้น และ ชั่วโมงนั้น
-            # หมายเหตุ: Logic นี้แบบง่าย เช็คเฉพาะชั่วโมงเริ่มต้น
             sessions_in_slot = []
             for s in weekly_sessions:
                 # แปลงเป็น local time ก่อนเทียบ
@@ -221,7 +219,8 @@ def homepage_view(request):
                 'sessions': sessions_in_slot
             })
         calendar_grid.append(row)
-
+        
+    # 1. ข้อมูลตารางเรียนวันนี้
     today_sessions = StudySession.objects.filter(user=user, start_time__date=today).order_by('start_time')
     total_today = today_sessions.count()
     completed_today = today_sessions.filter(is_completed=True).count()
@@ -230,7 +229,7 @@ def homepage_view(request):
 
     next_session = today_sessions.filter(is_completed=False).first()
     
-    # 2. ข้อมูลตารางเรียนทั้งหมด (Upcoming)
+    # 2. ข้อมูลตารางเรียนทั้งหมด
     upcoming_sessions = StudySession.objects.filter(
         user=user, 
         start_time__gte=now - timedelta(days=1) 
@@ -287,12 +286,12 @@ def add_subject_view(request):
             # 2. จัดการไฟล์
             files = request.FILES.getlist('files')
             
-            # เช็คโควต้าว่าถ้ารวมของเดิมแล้วเกิน 5 ไหม (เผื่อในอนาคตมี Edit)
+            # เช็คโควต้าว่าถ้ารวมของเดิมแล้วเกิน 5 ไหม
             current_files_count = File.objects.filter(subject=subject).count()
             
             for index, f in enumerate(files):
                 if current_files_count + index + 1 > 5:
-                    break # หยุดถ้าเกิน 5
+                    break
 
                 # สร้าง File object
                 File.objects.create(
@@ -301,7 +300,7 @@ def add_subject_view(request):
                     file_name=f.name,
                     file_type=f.content_type,
                     size_in_bytes=f.size,
-                    order=index + 1 # ลำดับเริ่มที่ 1
+                    order=index + 1
                 )
             
             return redirect('add_subject')
@@ -318,15 +317,15 @@ def add_subject_view(request):
 def delete_subject_view(request, subject_id):
     subject = get_object_or_404(Subject, subject_id=subject_id, user=request.user)
     if request.method == 'POST':
-        # --- ✅ เพิ่ม: ตามลบ Event ใน Google ของวิชานี้ ---
+        # ---: ตามลบ Event ใน Google ของวิชานี้ ---
         related_sessions = StudySession.objects.filter(subject=subject)
         for session in related_sessions:
             if session.google_event_id:
                 delete_event_from_google(request.user, session.google_event_id)
 
         subject.delete()
-        return redirect('add_subject')
-    return redirect('add_subject')
+        return redirect('home_page')
+    return redirect('home_page')
 
 @login_required
 def delete_file_view(request, file_id):
@@ -397,10 +396,9 @@ def set_schedule_view(request):
 
     # นิยามช่วงเวลาว่าชั่วโมงไหนอยู่กล่องไหน
     time_definitions = {
-        'morning': list(range(6, 12)),    # 06, 07, ..., 11 (6 ชั่วโมง)
-        'afternoon': list(range(12, 17)), # 12, ..., 16 (5 ชั่วโมง) *แก้จาก 18 เป็น 17
-        'evening': list(range(17, 21)),   # 17, ..., 20 (4 ชั่วโมง) *เริ่มเร็วขึ้น จบเร็วขึ้น
-        # ช่วงดึก: 21:00 ถึง 23:00 และ 00:00 ถึง 05:00
+        'morning': list(range(6, 12)),   
+        'afternoon': list(range(12, 17)), 
+        'evening': list(range(17, 21)),   
         'night': list(range(21, 24)) + list(range(0, 6)) 
     }
 
@@ -409,7 +407,7 @@ def set_schedule_view(request):
         UserAvailability.objects.filter(user=request.user).delete()
         
         slots_to_create = []
-        # รับค่าแบบ hour_0_6 (day 0, hour 6)
+        # รับค่าแบบ hour_0_6 
         for key in request.POST:
             if key.startswith('hour_'):
                 _, day, hour = key.split('_')
@@ -419,19 +417,18 @@ def set_schedule_view(request):
         UserAvailability.objects.bulk_create(slots_to_create)
         return redirect('study_settings')
 
-    # ดึงข้อมูลชั่วโมงที่ว่างจริงออกมา
+    # ดึงข้อมูลชั่วโมงที่ว่างจริง
     existing_hours = UserAvailability.objects.filter(user=request.user)
-    # สร้าง set เก็บว่า (วัน, ชั่วโมง) ไหนบ้างที่มีข้อมูล
-    # รูปแบบ: "0_6" หมายถึง วันจันทร์ 6 โมง
+    # สร้าง set เก็บว่า วัน, ชั่วโมง ไหนบ้างที่มีข้อมูล
+    # "0_6" หมายถึง วันจันทร์ 6 โมง
     selected_hour_keys = set(f"{slot.day_of_week}_{slot.hour}" for slot in existing_hours)
 
-    # เตรียมข้อมูลเพื่อส่งไปหน้าเว็บ (UI Blocks)
-    # เราต้องบอกหน้าเว็บว่า กล่องนี้ถูกเลือก "Full", "Partial", หรือ "None"
+    # เตรียมข้อมูลส่งไปหน้าเว็บ
     ui_blocks_state = {} 
     
     for day_num in days_of_week.keys():
         for slot_name, hours in time_definitions.items():
-            # เช็คว่าในชั่วโมงของช่วงนี้ ถูกเลือกกี่ชั่วโมง
+            # เช็คว่าถูกเลือกกี่ชั่วโมง
             selected_count = sum(1 for h in hours if f"{day_num}_{h}" in selected_hour_keys)
             total_count = len(hours)
             
@@ -446,7 +443,7 @@ def set_schedule_view(request):
                 'selected_hours': [h for h in hours if f"{day_num}_{h}" in selected_hour_keys]
             }
 
-    # ข้อมูลสำหรับ Modal (ให้ loop สร้าง checkbox)
+    # ข้อมูลสำหรับ Modal ให้ loop สร้าง checkbox
     time_slots_data = [
         {'id': 'morning', 'class': 'morning', 'label': 'ช่วงเช้า', 'hours': time_definitions['morning']},
         {'id': 'afternoon', 'class': 'afternoon', 'label': 'ช่วงบ่าย', 'hours': time_definitions['afternoon']},
@@ -457,14 +454,13 @@ def set_schedule_view(request):
     context = {
         'days': days_of_week, 
         'time_slots': time_slots_data,
-        'ui_blocks_state': ui_blocks_state, # เอาไว้ render สีกล่อง
+        'ui_blocks_state': ui_blocks_state, # render สีกล่อง
         'selected_hour_keys': list(selected_hour_keys), # เอาไว้ check ใน modal
     }
     return render(request, 'core/set_schedule.html', context)
 
 @login_required
 def study_settings_view(request):
-    # เหลือฟังก์ชันเดียวที่มี Logic ครบถ้วน
     settings, created = UserSettings.objects.get_or_create(user=request.user)
 
     if request.method == 'POST':
@@ -500,18 +496,16 @@ def toggle_session_complete(request, session_id):
 
 @login_required
 def start_studying_view(request, session_id):
-    # ดึงข้อมูล Session ที่จะเรียน
+    # ดึงข้อมูล Session
     session = get_object_or_404(StudySession, session_id=session_id, user=request.user)
     
-    # ดึงการตั้งค่า (เพื่อเอาเวลาพัก)
+    # ดึงการตั้งค่า
     settings, _ = UserSettings.objects.get_or_create(user=request.user)
     
-    # คำนวณระยะเวลาเรียนเป็นนาที
+    # คำนวณระยะเวลาเป็นนาที
     duration = (session.end_time - session.start_time).total_seconds() / 60
-    
-    # (Optional) คำนวณความคืบหน้าของวิชานี้ (สมมติ)
-    # อาจจะดึงจาก ProgressAnalytic หรือคำนวณสดๆ ก็ได้
-    subject_progress = 0 # ใส่ Logic คำนวณจริงตรงนี้ถ้ามี
+
+    subject_progress = 0 
     
     context = {
         'session': session,
@@ -523,12 +517,12 @@ def start_studying_view(request, session_id):
 
 @login_required
 def complete_session_view(request, session_id):
-    # 1. บันทึกสถานะว่าเรียนจบ
+    # 1. บันทึกสถานะว่าอ่านจบ
     session = get_object_or_404(StudySession, session_id=session_id, user=request.user)
     session.is_completed = True
     session.save()
     
-    # 2. Redirect ไปยังหน้าแสดงผลลัพธ์ (Finished Page)
+    # 2. Redirect ไปหน้าแสดงผลลัพธ์
     return redirect('finished_studying', session_id=session.session_id)
 
 @login_required
@@ -536,7 +530,7 @@ def finished_studying_view(request, session_id):
     session = get_object_or_404(StudySession, session_id=session_id, user=request.user)
     settings, _ = UserSettings.objects.get_or_create(user=request.user)
     
-    # คำนวณระยะเวลา (นาที)
+    # คำนวณระยะเวลา
     duration = (session.end_time - session.start_time).total_seconds() / 60
     
     context = {
@@ -546,11 +540,10 @@ def finished_studying_view(request, session_id):
     }
     return render(request, 'core/finished_studying.html', context)
 
-# API สำหรับให้ AI สรุปเนื้อหาและบันทึกลง DB (ใช้คู่กับ Popup Loading)
 @login_required
 def get_session_summary(request, session_id):
     """
-    API สำหรับเรียก AI สรุปเนื้อหาและบันทึกลง DB (ใช้คู่กับ Popup Loading)
+    API สำหรับเรียก AI สรุปเนื้อหาและบันทึกลง DB
     """
     if request.method == 'GET':
         try:
@@ -572,7 +565,7 @@ def get_session_summary(request, session_id):
                 summary_obj.content = ai_content
                 summary_obj.save()
             
-            # 3. ส่งผลลัพธ์กลับว่า "เสร็จแล้ว" (ไม่ต้องส่ง content กลับไป เพราะเดี๋ยวจะ redirect ไปดูหน้าเต็ม)
+            # 3. ส่งผลลัพธ์กลับ
             return JsonResponse({'success': True})
 
         except Exception as e:
@@ -583,11 +576,11 @@ def get_session_summary(request, session_id):
 @login_required
 def study_summary_view(request, session_id):
     """
-    หน้าแสดงสรุปเนื้อหา (แยกออกมาเป็นหน้าใหม่)
+    หน้าแสดงสรุปเนื้อหา
     """
     session = get_object_or_404(StudySession, session_id=session_id, user=request.user)
     
-    # 1. เช็คว่ามีสรุปอยู่แล้วหรือไม่?
+    # 1. เช็คว่ามีสรุปอยู่แล้วหรือไม่
     summary_obj, created = StudySummary.objects.get_or_create(
         session=session,
         defaults={
@@ -597,7 +590,7 @@ def study_summary_view(request, session_id):
         }
     )
 
-    # 2. ถ้าเพิ่งสร้าง (ยังไม่มีเนื้อหา) หรือเนื้อหาว่างเปล่า -> ให้ AI สรุป
+    # 2. ถ้าเพิ่งสร้าง หรือเนื้อหาว่างเปล่า -> ให้ AI สรุป
     if created or not summary_obj.content:
         # เรียก AI
         ai_content = generate_content_summary(session.subject.name, session.topic)
@@ -643,16 +636,15 @@ def submit_quiz_view(request):
     try:
         data = json.loads(request.body)
         session_id = data.get('session_id')
-        questions = data.get('questions') # โจทย์ที่ AI สร้าง (ส่งกลับมาบันทึก)
-        user_answers = data.get('answers') # คำตอบที่ user เลือก (Array of int)
+        questions = data.get('questions')
+        user_answers = data.get('answers')
 
         session = get_object_or_404(StudySession, session_id=session_id, user=request.user)
 
-        # คำนวณคะแนน Server-side
+        # คำนวณคะแนน
         score = 0
         for i, q in enumerate(questions):
             # ตรวจว่าตอบถูกไหม (เทียบ user_answers[i] กับ correct_index)
-            # ต้องระวังเรื่อง index out of range หรือค่าว่าง
             user_ans = user_answers[i]
             if user_ans is not None and int(user_ans) == int(q['correct_index']):
                 score += 1
@@ -691,7 +683,7 @@ def quiz_solution_view(request, result_id):
     """ หน้าดูเฉลยละเอียด """
     result = get_object_or_404(QuizResult, result_id=result_id, user=request.user)
     
-    # รวมข้อมูลโจทย์และคำตอบผู้ใช้ เพื่อส่งไปวนลูปใน Template ได้ง่ายๆ
+    # รวมข้อมูลโจทย์และคำตอบผู้ใช้ เพื่อส่งไปวนลูปใน Template
     solution_data = []
     for i, q in enumerate(result.questions_data):
         user_ans_index = result.user_answers[i]
@@ -723,7 +715,7 @@ def google_auth_callback(request):
             exchange_code_for_token(request.user, code)
             messages.success(request, 'เชื่อมต่อ Google Calendar สำเร็จ!')
             
-            # พอเชื่อมต่อเสร็จ ให้ซิงค์ทันทีเลย
+            # พอเชื่อมต่อเสร็จ ให้ซิงค์ทันที
             return redirect('sync_calendar')
             
         except Exception as e:
@@ -753,7 +745,7 @@ def edit_profile_view(request):
     user_settings, created = UserSettings.objects.get_or_create(user=request.user)
 
     if request.method == 'POST':
-        # รับข้อมูลจากทั้ง 2 ฟอร์ม (สังเกต request.FILES สำหรับรูปภาพ)
+        # รับข้อมูลจากทั้ง 2 ฟอร์ม
         user_form = UserUpdateForm(request.POST, request.FILES, instance=request.user)
         settings_form = UserSettingsForm(request.POST, instance=user_settings)
 

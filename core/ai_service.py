@@ -54,7 +54,7 @@ def generate_study_schedule(user, user_settings):
     Current Date/Time: {current_time_str} (Do NOT schedule anything before this time).
     
     Configuration:
-    - Session Duration: {user_settings.session_duration} minutes per session.
+    - Session Duration: {user_settings.session_duration} minutes per session (the final session may be shorter to fit the remaining time).
     - Break Duration: {user_settings.break_duration} minutes between sessions.
     
     Subjects to study (Source of Truth):
@@ -90,13 +90,12 @@ def generate_study_schedule(user, user_settings):
         raw_text = response.text
         print(f"AI Response Raw (First 100 chars): {raw_text[:100]}...")
 
-        # --- New Cleaning Logic ---
-        # ลบ Markdown Code Block ออก (เช่น ```json ... ```)
+        # ลบ Markdown Code Block ออก
         cleaned_text = re.sub(r'```json\s*', '', raw_text)
         cleaned_text = re.sub(r'```\s*', '', cleaned_text)
         cleaned_text = cleaned_text.strip()
 
-        # พยายามหา List [ ... ] ด้วย Regex เผื่อมีข้อความอื่นปนมา
+        # หา List ด้วย Regex
         json_match = re.search(r'\[.*\]', cleaned_text, re.DOTALL)
         if json_match:
             cleaned_text = json_match.group(0)
@@ -126,12 +125,12 @@ def generate_study_schedule(user, user_settings):
 
         print(f"ได้รายการตารางเรียนมาทั้งหมด: {len(schedule_list)} รายการ")
 
-        # 5. บันทึกลง Database
-        # --- ✅ ส่วนที่เพิ่มใหม่: ลบ Event เก่าใน Google Calendar ก่อน ---
+        # บันทึกลง Database
+        # ลบ Event เก่าใน Google Calendar
         old_sessions = StudySession.objects.filter(user=user, is_completed=False)
         
         for session in old_sessions:
-            # ถ้า Session นี้เคยซิงค์ไปแล้ว (มี ID) ให้ลบออกจาก Google ด้วย
+            # ถ้า Session นี้เคยซิงค์ไปแล้ว ให้ลบออกจาก Google 
             if session.google_event_id:
                 delete_event_from_google(user, session.google_event_id)
                 
@@ -142,12 +141,12 @@ def generate_study_schedule(user, user_settings):
         for item in schedule_list:
             subject_name = item.get('subject_name', '').strip()
             
-            # ค้นหาวิชา (Case-Insensitive)
+            # ค้นหาวิชา
             subject_obj = subjects.filter(name__iexact=subject_name).first()
             
             if subject_obj:
                 try:
-                    # แปลงเวลาและใส่ Timezone (สำคัญมากสำหรับ Django)
+                    # แปลงเวลาและใส่ Timezone
                     naive_start = datetime.datetime.strptime(item['start_time'], "%Y-%m-%d %H:%M")
                     naive_end = datetime.datetime.strptime(item['end_time'], "%Y-%m-%d %H:%M")
                     
@@ -246,7 +245,7 @@ def generate_quiz_questions(subject_name, topic):
         
         print(f"DEBUG RAW AI: {raw_text[:50]}...") # ดูว่า AI ตอบกลับมาไหม
 
-        # ใช้ Regex แกะ JSON (ต้องมี import re ข้างบนสุด)
+        # ใช้ Regex แกะ JSON ต้องมี import re ข้างบนสุด
         match = re.search(r'\[.*\]', raw_text, re.DOTALL)
         
         if match:
@@ -254,9 +253,9 @@ def generate_quiz_questions(subject_name, topic):
             json_str = json_str.replace("`", "") 
             return json.loads(json_str)
         else:
-            print("❌ Error: AI ไม่ได้ส่ง JSON Array มา")
+            print("Error: AI ไม่ได้ส่ง JSON Array มา")
             return None
 
     except Exception as e:
-        print(f"❌ AI Quiz Error: {e}") # Log นี้สำคัญมาก
+        print(f"AI Quiz Error: {e}") # Log นี้สำคัญมาก
         return None

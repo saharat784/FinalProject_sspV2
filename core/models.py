@@ -146,7 +146,7 @@ class UserAvailability(models.Model):
     day_of_week = models.IntegerField(choices=DAY_CHOICES)
     # time_slot = models.CharField(max_length=10, choices=TIMESLOT_CHOICES)
 
-    # ✅ เปลี่ยนจาก time_slot (Char) เป็น hour (Int)
+    # เปลี่ยนจาก time_slot (Char) เป็น hour (Int)
     # เช่น 6 = 06:00-07:00, 13 = 13:00-14:00
     hour = models.IntegerField()
 

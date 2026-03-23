@@ -28,7 +28,6 @@ class CustomAuthenticationForm(AuthenticationForm):
 
 # ฟอร์มจัดการวิชา
 class SubjectForm(forms.ModelForm):
-    # ใช้ Widget ที่สร้างใหม่
     file = forms.FileField(
         widget=MultipleFileInput(attrs={'class': 'form-control', 'multiple': True}),
         label='ไฟล์ประกอบการเรียน (สูงสุด 5 ไฟล์)',
@@ -46,7 +45,7 @@ class SubjectForm(forms.ModelForm):
             'difficulty': forms.Select(attrs={'class': 'form-control'}),
         }
 
-    # เพิ่มฟังก์ชันตรวจสอบความถูกต้องของไฟล์
+    # ตรวจสอบความถูกต้องของไฟล์
     def clean_files(self):
         file = self.files.getlist('files')
         
@@ -74,12 +73,10 @@ class UserSettingsForm(forms.ModelForm):
         fields = ['session_duration', 'break_duration', 'notifications_enabled', 'bio', 'academic_goal']
         
         widgets = {
-            # อันเดิม (ถ้าไม่ได้ใส่ widget ไว้ก็ปล่อยว่างได้ แต่แนะนำให้ใส่ class form-control)
             'session_duration': forms.NumberInput(attrs={'class': 'form-control'}),
             'break_duration': forms.NumberInput(attrs={'class': 'form-control'}),
             'notifications_enabled': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             
-            # อันใหม่
             'bio': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'คติประจำใจ หรือ คำอธิบายตัวเองสั้นๆ'}),
             'academic_goal': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'เช่น อยากได้เกรด 3.50 ขึ้นไป'}),
         }

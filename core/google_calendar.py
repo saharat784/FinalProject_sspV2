@@ -6,8 +6,8 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from django.conf import settings
-from google.auth.transport.requests import Request  # <--- เพิ่ม
-from google.auth.exceptions import RefreshError     # <--- เพิ่ม
+from google.auth.transport.requests import Request 
+from google.auth.exceptions import RefreshError     
 from .models import GoogleCredential, StudySession
 
 # ตั้งค่า Path ของไฟล์ client_secret.json
@@ -54,7 +54,7 @@ def sync_sessions_to_google(user):
         g_cred = GoogleCredential.objects.get(user=user)
         creds = Credentials(**g_cred.token)
 
-        # --- เพิ่ม: ตรวจสอบและ Refresh Token อัตโนมัติ ---
+        # ตรวจสอบและ Refresh Token อัตโนมัติ
         try:
             if not creds.valid:
                 if creds.expired and creds.refresh_token:
@@ -66,7 +66,7 @@ def sync_sessions_to_google(user):
                     })
                     g_cred.save()
         except (RefreshError, Exception) as e:
-            # ถ้า Refresh ไม่ผ่าน (เช่น invalid_grant) ให้ลบทิ้งเลย
+            # Refresh ไม่ผ่านให้ลบทิ้ง
             print(f"Token expired/invalid: {e}")
             g_cred.delete()
             return False, "ยังไม่ได้เชื่อมต่อ (Session หมดอายุ กรุณา Login ใหม่)"
@@ -79,7 +79,7 @@ def sync_sessions_to_google(user):
         
         synced_count = 0
         for session in sessions:
-            # แปลงเวลาเป็น Format ที่ Google ต้องการ (ISO Format)
+            # แปลงเวลาเป็น Format ที่ Google ต้องการ
             start_time = session.start_time.isoformat()
             end_time = session.end_time.isoformat()
             
@@ -88,7 +88,7 @@ def sync_sessions_to_google(user):
                 'description': f"Topic: {session.topic}\n(Created by Smart Study Planner)",
                 'start': {
                     'dateTime': start_time,
-                    'timeZone': 'Asia/Bangkok', # หรือ 'UTC' ตาม setting
+                    'timeZone': 'Asia/Bangkok',
                 },
                 'end': {
                     'dateTime': end_time,
@@ -103,7 +103,7 @@ def sync_sessions_to_google(user):
             }
 
             try:
-                # ยิง API ไปสร้าง Event
+                # สร้าง Event ใน Google Calendar
                 event_result = service.events().insert(calendarId='primary', body=event).execute()
                 
                 # อัปเดตสถานะใน DB เรา
@@ -116,7 +116,7 @@ def sync_sessions_to_google(user):
                 error_str = str(e)
                 print(f"Error syncing session {session.session_id}: {e}")
 
-                # --- เพิ่ม: ดักจับ Error invalid_grant ในลูป ---
+                # ดัก Error invalid_grant ในลูป
                 if 'invalid_grant' in error_str:
                     g_cred.delete() # ลบ Token ทิ้ง
                     return False, "ยังไม่ได้เชื่อมต่อ (Token หลุดระหว่างทำงาน กรุณา Login ใหม่)"
